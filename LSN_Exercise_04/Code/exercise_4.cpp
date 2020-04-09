@@ -12,6 +12,8 @@ int main (int argc, char *argv[]){
 
 	Random rnd = RandomGenerator();		//imposto il generatore di numeri casuali
 
+	cout<<"eserc 1"<<endl;
+
 	rnd.SaveSeed();
 	return 0;
 }

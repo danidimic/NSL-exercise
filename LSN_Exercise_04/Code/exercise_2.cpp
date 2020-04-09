@@ -12,6 +12,7 @@ int main (int argc, char *argv[]){
 
 	Random rnd = RandomGenerator();		//imposto il generatore di numeri casuali
 
+
 	rnd.SaveSeed();
 	return 0;
 }
