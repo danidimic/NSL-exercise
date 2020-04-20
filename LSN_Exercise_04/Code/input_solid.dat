@@ -10,14 +10,14 @@
 100
 0
 
-  ReadInput >> temp;
-  ReadInput >> npart;
-  ReadInput >> rho;
-  ReadInput >> rcut;
-  ReadInput >> delta;
-  ReadInput >> nstep;
-  ReadInput >> iprint;
+	ReadInput >> temp;
+	ReadInput >> npart;
+	ReadInput >> rho;
+	ReadInput >> rcut;
+	ReadInput >> delta;
+	ReadInput >> nstep;
+	ReadInput >> iprint;
 	ReadInput >> restart;					0=false, 1=true
-	ReadInput >> data_blocking;		0=false, 1=true
+	ReadInput >> data_blocking;				0=false, 1=true
 	ReadInput >> nblock;
 	ReadInput >> instant;					0=false, 1=true

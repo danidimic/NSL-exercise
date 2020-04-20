@@ -14,7 +14,7 @@ using namespace std;
 const int m_props=4;
 int n_props;
 int iv,ik,it,ie;
-double stima_pot, stima_kin, stima_etot, stima_temp;
+double stima_pot, stima_kin, stima_etot, stima_temp, stima_pres;
 
 // averages
 double acc,att;
@@ -36,7 +36,7 @@ bool restart, instant;
 //data blocking
 int nblock, nvalues;
 bool data_blocking;
-vector<double> ave_epot(0), ave_ekin(0), ave_etot(0), ave_temp(0);
+vector<double> ave_epot(0), ave_ekin(0), ave_etot(0), ave_temp(0), ave_pres(0);
 
 //functions
 void Input(void);

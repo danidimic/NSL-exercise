@@ -32,12 +32,14 @@ int main(){
 			ave_ekin.at(iblock) += stima_kin;
 			ave_temp.at(iblock) += stima_temp;
 			ave_etot.at(iblock) += stima_etot;
+			ave_pres.at(iblock) += stima_pres;
 
 			if(istep%nvalues==0){		//valori medi su ciascun blocco
 				ave_epot.at(iblock) /= nvalues;
 				ave_ekin.at(iblock) /= nvalues;
 				ave_temp.at(iblock) /= nvalues;
 				ave_etot.at(iblock) /= nvalues;
+				ave_pres.at(iblock) /= nvalues;
 				iblock++;
 			}
 		}
@@ -94,6 +96,7 @@ void Input(void){ //Prepare all stuff for the simulation
 		ave_ekin.resize(nblock);
 		ave_etot.resize(nblock);
 		ave_temp.resize(nblock);
+		ave_pres.resize(nblock);
 	}
 
   cout << "The program integrates Newton equations with the Verlet method " << endl;
@@ -258,30 +261,33 @@ double Force(int ip, int idir){ //Compute forces as -Grad_ip V(r)
 
 void Measure(){ //Properties measurement
   int bin;
-  double v, t, vij;
+  double v, t, p, vij, pij;
   double dx, dy, dz, dr;
-  ofstream Epot, Ekin, Etot, Temp;
+  ofstream Epot, Ekin, Etot, Temp, Pres;
 
   v = 0.0; //reset observables
   t = 0.0;
+	p = 0.0;
 
-//cycle over pairs of particles
-  for (int i=0; i<npart-1; ++i){
-    for (int j=i+1; j<npart; ++j){
+	//cycle over pairs of particles
+	for (int i=0; i<npart-1; ++i){
+		for (int j=i+1; j<npart; ++j){
 
-     dx = Pbc( xold[i] - xold[j] ); // here I use old configurations [old = r(t)]
-     dy = Pbc( yold[i] - yold[j] ); // to be compatible with EKin which uses v(t)
-     dz = Pbc( zold[i] - zold[j] ); // => EPot should be computed with r(t)
+			dx = Pbc( xold[i] - xold[j] ); // here I use old configurations [old = r(t)]
+			dy = Pbc( yold[i] - yold[j] ); // to be compatible with EKin which uses v(t)
+			dz = Pbc( zold[i] - zold[j] ); // => EPot should be computed with r(t)
 
-     dr = dx*dx + dy*dy + dz*dz;
-     dr = sqrt(dr);
+			dr = dx*dx + dy*dy + dz*dz;
+			dr = sqrt(dr);
 
-     if(dr < rcut){
-       vij = 4.0/pow(dr,12) - 4.0/pow(dr,6);
-
-//Potential energy
-       v += vij;
-     }
+			if(dr < rcut){
+				//Potential energy
+				vij = 4.0/pow(dr,12) - 4.0/pow(dr,6);
+				v += vij;
+				//Pressure
+				pij = 48.0*( 1.0/pow(dr,12) - 0.5/pow(dr,6) );
+				p += pij;
+			}
     }          
   }
 
@@ -292,60 +298,69 @@ void Measure(){ //Properties measurement
 	stima_kin = t/(double)npart; //Kinetic energy per particle
 	stima_temp = (2.0 / 3.0) * t/(double)npart; //Temperature
 	stima_etot = (t+v)/(double)npart; //Total energy per particle
+	stima_pres = rho*stima_temp + p/(3*vol);
 
 	if(instant==true){		//scrivi i valori istantanei se instant==true
 		Epot.open("results/epot.out",ios::app);
 		Ekin.open("results/ekin.out",ios::app);
 		Temp.open("results/temp.out",ios::app);
 		Etot.open("results/etot.out",ios::app);
+		Pres.open("results/pres.out",ios::app);
 
 		Epot << stima_pot  << endl;
 		Ekin << stima_kin  << endl;
 		Temp << stima_temp << endl;
 		Etot << stima_etot << endl;
+		Pres << stima_pres << endl;
 
 		Epot.close();
 		Ekin.close();
 		Temp.close();
 		Etot.close();
+		Pres.close();
 	}
 
     return;
 }
 
 void Average_values(void){
-	ofstream Epot, Ekin, Etot, Temp;
+	ofstream Epot, Ekin, Etot, Temp, Pres;
 
 	Epot.open("results/ave_epot.out",ios::app);
 	Ekin.open("results/ave_ekin.out",ios::app);
 	Temp.open("results/ave_temp.out",ios::app);
 	Etot.open("results/ave_etot.out",ios::app);
+	Pres.open("results/ave_pres.out",ios::app);
 
-	vector<double> cum_epot(nblock), cum_ekin(nblock), cum_etot(nblock), cum_temp(nblock);
-	vector<double> err_epot(nblock), err_ekin(nblock), err_etot(nblock), err_temp(nblock);
+	vector<double> cum_epot(nblock), cum_ekin(nblock), cum_etot(nblock), cum_temp(nblock), cum_pres(nblock);
+	vector<double> err_epot(nblock), err_ekin(nblock), err_etot(nblock), err_temp(nblock), err_pres(nblock);
 
 	//medie progressive
 	cum_epot = media_progressiva( ave_epot );
 	cum_ekin = media_progressiva( ave_ekin );
 	cum_etot = media_progressiva( ave_etot );
 	cum_temp = media_progressiva( ave_temp );
+	cum_pres = media_progressiva( ave_pres );
 	//incertezze statistiche
 	err_epot = errore( ave_epot );
 	err_ekin = errore( ave_ekin );
 	err_etot = errore( ave_etot );
 	err_temp = errore( ave_temp );
+	err_pres = errore( ave_pres );
 
 	for(int i=0; i<nblock; i++){
 		Epot << i << "  " << cum_epot[i] << "  " << err_epot[i] << endl;
 		Ekin << i << "  " << cum_ekin[i] << "  " << err_ekin[i] << endl;
 		Temp << i << "  " << cum_temp[i] << "  " << err_temp[i] << endl;
 		Etot << i << "  " << cum_etot[i] << "  " << err_etot[i] << endl;
+		Pres << i << "  " << cum_pres[i] << "  " << err_pres[i] << endl;
 	}
 
 	Epot.close();
 	Ekin.close();
 	Temp.close();
 	Etot.close();
+	Pres.close();
 	return;
 }
 
