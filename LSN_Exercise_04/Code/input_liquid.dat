@@ -3,7 +3,7 @@
 0.8
 2.5
 0.0005
-200000
+250000
 5000
 1
 1
@@ -17,7 +17,7 @@
 	ReadInput >> delta;
 	ReadInput >> nstep;
 	ReadInput >> iprint;
-	ReadInput >> restart;					0=false, 1=true
+	ReadInput >> restart;
 	ReadInput >> data_blocking;				0=false, 1=true
 	ReadInput >> nblock;
 	ReadInput >> instant;					0=false, 1=true

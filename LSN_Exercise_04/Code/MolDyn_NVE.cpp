@@ -59,7 +59,7 @@ int main(){
 
 
 void Input(void){ //Prepare all stuff for the simulation
-  ifstream ReadInput,ReadConf;
+  ifstream ReadInput, ReadConf;
   double ep, ek, pr, et, vir;
 
   cout << "Classic Lennard-Jones fluid        " << endl;
@@ -90,6 +90,8 @@ void Input(void){ //Prepare all stuff for the simulation
   ReadInput >> iprint;
 
 	ReadInput >> restart;
+	//ReadConf.open("old.0");
+	//restart = ReadConf.is_open();
 
 	ReadInput >> data_blocking;
 	ReadInput >> nblock;
@@ -116,6 +118,7 @@ void Input(void){ //Prepare all stuff for the simulation
   it = 3; //Temperature
   n_props = 4; //Number of observables
 
+	//Prepare system from only one configuration
 	if( restart==false ){
 		//Read initial configuration
 		cout << "Read initial configuration from file config.0 " << endl << endl;
@@ -163,6 +166,7 @@ void Input(void){ //Prepare all stuff for the simulation
 		 }
 	}
 
+	//Prepare the system from old configuratons
 	if( restart==true ){
 		cout << "Read initial configuration from file old.0 " << endl << endl;
 		ReadConf.open("old.0");
@@ -174,8 +178,8 @@ void Input(void){ //Prepare all stuff for the simulation
 		}
 		ReadConf.close();
 
-	cout << "Read previous configuration from file old.final " << endl << endl;
-		ReadConf.open("old.0");
+		cout << "Read previous configuration from file old.final " << endl << endl;
+		ReadConf.open("old.final");
 		for (int i=0; i<npart; ++i){
 		  ReadConf >> xold[i] >> yold[i] >> zold[i];
 		  xold[i] = xold[i] * box;
@@ -266,7 +270,7 @@ double Force(int ip, int idir){ //Compute forces as -Grad_ip V(r)
 
 void Measure(){ //Properties measurement
   int bin;
-  double v, t, p, vij, pij;
+  double v, p, t, vij, pij;
   double dx, dy, dz, dr;
   ofstream Epot, Ekin, Etot, Temp, Pres;
 
@@ -274,7 +278,7 @@ void Measure(){ //Properties measurement
   t = 0.0;
 	p = 0.0;
 
-	//cycle over pairs of particles
+//cycle over pairs of particles
 	for (int i=0; i<npart-1; ++i){
 		for (int j=i+1; j<npart; ++j){
 
@@ -293,19 +297,20 @@ void Measure(){ //Properties measurement
 				pij = 48.0*( 1.0/pow(dr,12) - 0.5/pow(dr,6) );
 				p += pij;
 			}
-    }          
-  }
+		}          
+	}
 
-//Kinetic energy
-  for (int i=0; i<npart; ++i) t += 0.5 * (vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i]);
+	//Kinetic energy
+	for (int i=0; i<npart; ++i) t += 0.5 * (vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i]);
    
 	stima_pot = v/(double)npart; //Potential energy per particle
 	stima_kin = t/(double)npart; //Kinetic energy per particle
 	stima_temp = (2.0 / 3.0) * t/(double)npart; //Temperature
 	stima_etot = (t+v)/(double)npart; //Total energy per particle
-	stima_pres = rho*stima_temp + p/(3*vol);
+	stima_pres = rho*stima_temp + p/(3*vol);	//Pressure
 
-	if(instant==true){		//scrivi i valori istantanei se instant==true
+	
+	if(instant==true){
 		Epot.open("results/epot.out",ios::app);
 		Ekin.open("results/ekin.out",ios::app);
 		Temp.open("results/temp.out",ios::app);
