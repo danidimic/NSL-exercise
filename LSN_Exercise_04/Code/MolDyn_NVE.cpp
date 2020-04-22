@@ -17,32 +17,37 @@ using namespace std;
 
 int main(){ 
 	Input();             //Inizialization
-	int nconf = 1, iblock = 0;
+	//int nconf = 1;
+	int nmeas = 0, iblock = 0;
+
 	for(int istep=1; istep <= nstep; ++istep){
 		Move();           //Move particles with Verlet algorithm
 		if(istep%iprint == 0) cout << "Number of time-steps: " << istep << endl;
+		
 		if(istep%10 == 0){
 			Measure();     			//Properties measurement
-			//ConfXYZ(nconf);		//Write actual configuration in XYZ format
-			nconf += 1;
-		}
-		
-		if(data_blocking==true){	//somme su ciascun blocco
-			ave_epot.at(iblock) += stima_pot;
-			ave_ekin.at(iblock) += stima_kin;
-			ave_temp.at(iblock) += stima_temp;
-			ave_etot.at(iblock) += stima_etot;
-			ave_pres.at(iblock) += stima_pres;
+			nmeas += 1;
 
-			if(istep%nvalues==0){		//valori medi su ciascun blocco
-				ave_epot.at(iblock) /= nvalues;
-				ave_ekin.at(iblock) /= nvalues;
-				ave_temp.at(iblock) /= nvalues;
-				ave_etot.at(iblock) /= nvalues;
-				ave_pres.at(iblock) /= nvalues;
-				iblock++;
-			}
-		}
+			//ConfXYZ(nconf);		//Write actual configuration in XYZ format
+			//nconf += 1;
+
+			if(data_blocking==true){	//somme su ciascun blocco
+				ave_epot.at(iblock) += stima_pot;
+				ave_ekin.at(iblock) += stima_kin;
+				ave_temp.at(iblock) += stima_temp;
+				ave_etot.at(iblock) += stima_etot;
+				ave_pres.at(iblock) += stima_pres;
+
+				if(nmeas%nvalues==0){		//valori medi su ciascun blocco
+					ave_epot.at(iblock) /= nvalues;
+					ave_ekin.at(iblock) /= nvalues;
+					ave_temp.at(iblock) /= nvalues;
+					ave_etot.at(iblock) /= nvalues;
+					ave_pres.at(iblock) /= nvalues;
+					iblock++;
+				}
+			}//data-blocking
+		}//measure
 	}
 	
 	if(data_blocking==true) 
@@ -88,7 +93,7 @@ void Input(void){ //Prepare all stuff for the simulation
 
 	ReadInput >> data_blocking;
 	ReadInput >> nblock;
-	nvalues = nstep/nblock;
+	nvalues = nstep/(10*nblock);
 	ReadInput >> instant;
 
 	if(data_blocking==true){
