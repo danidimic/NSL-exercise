@@ -67,7 +67,7 @@ double Random :: Rannyu(void){
 
   return r;
 }
-//Generazioni di valori uniformi sulla sfera
+//Generazioni di valori uniformi sulla sfera unitaria
 double* Random:: Sphere(){
 	double* s = new double[2];
 	s[0] = acos( 2*Rannyu()-1 );		//angolo theta
