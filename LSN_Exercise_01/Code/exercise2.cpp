@@ -6,21 +6,20 @@
 #include "random.h"
 using namespace std;
 
-#define M 10000		//numero di valori per ciascun istogramma S_N
-
 
 int main (int argc, char *argv[]){
 
 	Random rnd = RandomGenerator();		//imposto il generatore di numeri casuali
 
-	int n;
+	int n, nvalues = 1E5;
 	double s,e,l;
 	vector<int> N = {1,2,10,100};
-	vector<double> stand(4*M);
-	vector<double> expo(4*M);
-	vector<double> lorentz(4*M);		//vettori per immagazzinare i dati
 
-	for(int i=0; i<M; i++){ 	//ciclo per M valori casuali di ciascun istogramma
+	vector<double> stand(4*nvalues);			//dati per S_N uniforme
+	vector<double> expo(4*nvalues);			//dati per S_N esponenziale
+	vector<double> lorentz(4*nvalues);		//dati per S_N lorentziani
+
+	for(int i=0; i<nvalues; i++){ 	//ciclo per nvalues valori casuali di ciascun istogramma
 
 		for(int j=0; j<4; j++){		//ciclo sui possibili valori N=1,2,10,100
 			n = 4*i+j;
@@ -39,18 +38,18 @@ int main (int argc, char *argv[]){
 		}
 	}
 
-	ofstream Sdata("../Files/exe2_stand.out");		//output per gli istogrammi dei valori uniformi
-	ofstream Edata("../Files/exe2_expo.out");		//output per gli istogrammi dei valori distribuiti esponenzialmente
-	ofstream Ldata("../Files/exe2_lorentz.out");	//output per gli istogrammi dei valori distribuiti lorentzianamente
-	for(int i=0; i<M; i++){
+	ofstream Stand("../Files/SNstand.out");		//output per gli istogrammi dei valori uniformi
+	ofstream Expo("../Files/SNexpo.out");		//output per gli istogrammi dei valori distribuiti esponenzialmente
+	ofstream Lore("../Files/SNlorentz.out");	//output per gli istogrammi dei valori distribuiti lorentzianamente
+	for(int i=0; i<nvalues; i++){
 		n=4*i;
-		Sdata<<stand[n]<<"  "<<stand[n+1]<<"  "<<stand[n+2]<<"  "<<stand[n+3]<<endl;
-		Edata<<expo[n]<<"  "<<expo[n+1]<<"  "<<expo[n+2]<<"  "<<expo[n+3]<<endl;
-		Ldata<<lorentz[n]<<"  "<<lorentz[n+1]<<"  "<<lorentz[n+2]<<"  "<<lorentz[n+3]<<endl;
+		Stand<<stand[n]<<"  "<<stand[n+1]<<"  "<<stand[n+2]<<"  "<<stand[n+3]<<endl;
+		Expo<<expo[n]<<"  "<<expo[n+1]<<"  "<<expo[n+2]<<"  "<<expo[n+3]<<endl;
+		Lore<<lorentz[n]<<"  "<<lorentz[n+1]<<"  "<<lorentz[n+2]<<"  "<<lorentz[n+3]<<endl;
 	}
-	Sdata.close();
-	Edata.close();
-	Ldata.close();
+	Stand.close();
+	Expo.close();
+	Lore.close();
 
 	rnd.SaveSeed();
 
