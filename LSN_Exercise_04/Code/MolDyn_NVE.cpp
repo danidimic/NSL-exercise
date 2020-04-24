@@ -346,17 +346,17 @@ void Average_values(void){
 	vector<double> err_epot(nblock), err_ekin(nblock), err_etot(nblock), err_temp(nblock), err_pres(nblock);
 
 	//medie progressive
-	cum_epot = media_progressiva( ave_epot );
-	cum_ekin = media_progressiva( ave_ekin );
-	cum_etot = media_progressiva( ave_etot );
-	cum_temp = media_progressiva( ave_temp );
-	cum_pres = media_progressiva( ave_pres );
+	cum_epot = cumulative_average( ave_epot );
+	cum_ekin = cumulative_average( ave_ekin );
+	cum_etot = cumulative_average( ave_etot );
+	cum_temp = cumulative_average( ave_temp );
+	cum_pres = cumulative_average( ave_pres );
 	//incertezze statistiche
-	err_epot = errore( ave_epot );
-	err_ekin = errore( ave_ekin );
-	err_etot = errore( ave_etot );
-	err_temp = errore( ave_temp );
-	err_pres = errore( ave_pres );
+	err_epot = cumulative_error( ave_epot );
+	err_ekin = cumulative_error( ave_ekin );
+	err_etot = cumulative_error( ave_etot );
+	err_temp = cumulative_error( ave_temp );
+	err_pres = cumulative_error( ave_pres );
 
 	for(int i=0; i<nblock; i++){
 		Epot << i << "  " << cum_epot[i] << "  " << err_epot[i] << endl;

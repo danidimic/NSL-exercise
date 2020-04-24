@@ -4,13 +4,9 @@
 #include <vector>
 using namespace std;
 
-double modulo(vector<double> );
-double media(vector<double> );
-double devstd(vector<double>);
-double devstd_media(vector<double>);
-vector<double> media_progressiva( vector<double> );
-vector<double> media_progressiva_quad( vector<double> );
-vector<double> errore( vector<double> );
+vector<double> cumulative_average( vector<double> );
+vector<double> cumulative_average_quad( vector<double> );
+vector<double> cumulative_error( vector<double> );
 double chi_quadro( vector<double>, double );
 
 #endif // __Statistics__

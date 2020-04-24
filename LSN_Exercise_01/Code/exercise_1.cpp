@@ -35,8 +35,8 @@ int main (int argc, char *argv[]){
 		ave[i] = sum/L;		//valore medio degli L elementi di ciascun blocco
 	}
 
-	r1 = media_progressiva(ave);	//medie progressive
-	r1_err = errore(ave);		//incertezze statistica sulle medie progressive
+	r1 = cumulative_average(ave);	//medie progressive
+	r1_err = cumulative_error(ave);		//incertezze statistica sulle medie progressive
 
 	//----------------------------------------------------------------------------//
 	// Esercizio 01.1 parte 2 : calcolo della varianza			  				  //
@@ -50,8 +50,8 @@ int main (int argc, char *argv[]){
 		ave[i] = sum/L;		//valore medio degli L elementi di ciascun blocco
 	}
 
-	r2 = media_progressiva(ave);	//medie progressive
-	r2_err = errore(ave);		//incertezze statistica sulle medie progressive
+	r2 = cumulative_average(ave);	//medie progressive
+	r2_err = cumulative_error(ave);		//incertezze statistica sulle medie progressive
 
 	//----------------------------------------------------------------------------//
 	// Esercizio 01.1 parte 3 : test chi quadrato								  //

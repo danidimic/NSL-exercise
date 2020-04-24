@@ -47,11 +47,11 @@ int main (int argc, char *argv[]){
 	vector<double> ave1(N), err1(N);  	//vettori per immagazzinare i risultati uniform sampling
 	vector<double> ave2(N), err2(N);  	//vettori per immagazzinare i risultati importance sampling
 
-	ave1 = media_progressiva(I_uniform);	//media cumulativa integrale uniform sampling
-	err1 = errore(I_uniform);				//errore statistico integrale uniform sampling
+	ave1 = cumulative_average(I_uniform);	//media cumulativa integrale uniform sampling
+	err1 = cumulative_error(I_uniform);				//errore statistico integrale uniform sampling
 
-	ave2 = media_progressiva(I_importance);	//media cumulativa integrale importance sampling
-	err2 = errore(I_importance);			//errore statistico integrale importance sampling
+	ave2 = cumulative_average(I_importance);	//media cumulativa integrale importance sampling
+	err2 = cumulative_error(I_importance);			//errore statistico integrale importance sampling
 
 	ofstream data("../Files/exe1.out");		//genero l'output su un unico file di testo
 	if (data.is_open()){

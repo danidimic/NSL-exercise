@@ -55,11 +55,11 @@ int main (int argc, char *argv[]){
 		P[i] = sumP/M;	//media put-option
 	}
 
-	vector<double> ave_progC = media_progressiva( C );	//media progressiva call-option
-	vector<double> err_progC = errore( C );		//errore progressivo call-option
+	vector<double> ave_progC = cumulative_average( C );	//media progressiva call-option
+	vector<double> err_progC = cumulative_error( C );		//errore progressivo call-option
 
-	vector<double> ave_progP = media_progressiva( P );	//media progressiva call-option
-	vector<double> err_progP = errore( P );		//errore progressivo call-option
+	vector<double> ave_progP = cumulative_average( P );	//media progressiva call-option
+	vector<double> err_progP = cumulative_error( P );		//errore progressivo call-option
 
 	ofstream data("../Files/exe1_direct.out");		//genero l'output per il calcolo diretto
 	if (data.is_open()){
@@ -98,11 +98,11 @@ int main (int argc, char *argv[]){
 		P[i] = sumP/M;	//media put-option
 	}
 
-	ave_progC = media_progressiva( C );	//media progressiva call-option
-	err_progC = errore( C );		//errore progressivo call-option
+	ave_progC = cumulative_average( C );	//media progressiva call-option
+	err_progC = cumulative_error( C );		//errore progressivo call-option
 
-	ave_progP = media_progressiva( P );	//media progressiva call-option
-	err_progP = errore( P );		//errore progressivo call-option
+	ave_progP = cumulative_average( P );	//media progressiva call-option
+	err_progP = cumulative_error( P );		//errore progressivo call-option
 
 	data.open("../Files/exe1_discretiz.out");		//genero l'output per il calcolo discretizzato
 	if (data.is_open()){

@@ -3,7 +3,7 @@
 using namespace std;
 
 //calcolo delle medie progressive
-vector<double> media_progressiva( vector<double> v ){
+vector<double> cumulative_average( vector<double> v ){
 
 	int N = v.size();
 	vector<double> mp(N);
@@ -17,7 +17,7 @@ vector<double> media_progressiva( vector<double> v ){
 	return mp;
 }
 //calcolo delle medie progressive dei quadrati
-vector<double> media_progressiva_quad( vector<double> v ){
+vector<double> cumulative_average_quad( vector<double> v ){
 
 	int N = v.size();
 	vector<double> mpq(N);
@@ -30,14 +30,14 @@ vector<double> media_progressiva_quad( vector<double> v ){
 	}
 	return mpq;
 }
-//calcolo delle incertezze statistiche
-vector<double> errore( vector<double> v ){
+//calcolo delle incertezze statistiche sulle medie progressive
+vector<double> cumulative_error( vector<double> v ){
 
 	int N = v.size();
 	vector<double> mp(N);
-	mp = media_progressiva(v);	//vettore con le medie progressive
+	mp = cumulative_average(v);	//vettore con le medie progressive
 	vector<double> mpq(N);
-	mpq = media_progressiva_quad(v);  //vettore con le medie progressive dei quadrati
+	mpq = cumulative_average_quad(v);  //vettore con le medie progressive dei quadrati
 	vector<double> err(N);
 
 	for(int i=0; i<N; i++){

@@ -44,8 +44,8 @@ int main (int argc, char *argv[]){
 	}
 
 	vector<double> ave(N), err(N);  //vettori necessari per immagazzinare i risultati finali
-	ave = media_progressiva(pi);	//medie progressive sui blocchi
-	err = errore(pi);	//incertezze statistiche sui singoli blocchi
+	ave = cumulative_average(pi);	//medie progressive sui blocchi
+	err = cumulative_error(pi);	//incertezze statistiche sui singoli blocchi
 
 	ofstream data("../Files/exe3.out");		//genero l'output su un unico file di testo
 	if (data.is_open()){
