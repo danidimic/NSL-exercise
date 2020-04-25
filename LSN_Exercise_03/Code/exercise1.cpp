@@ -20,7 +20,7 @@ int main (int argc, char *argv[]){
 
 	Random rnd = RandomGenerator();		//imposto il generatore di numeri casuali
 
-	int nstep = 2E4, nblock = 100, nint = 100;
+	int nstep = 1E4, nblock = 100, nint = 100;
 
 	double t, t1, x, z, S;
 	double sumC_direct, sumP_direct;
