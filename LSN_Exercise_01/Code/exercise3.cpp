@@ -12,10 +12,9 @@ int main (int argc, char *argv[]){
 
 	Random rnd = RandomGenerator();		//imposto il generatore di numeri casuali
 	
-	int nblock = 100, nthrow = 1E4;
+	int nblock = 100, nthrow = 1E4, M;
 	double d = 0.75;	//spaziatura tra le righe del campo
 	double L = 0.5;		//lunghezza dell'ago
-	int M;
 	double x, y, z, theta;
 	vector<double> pi(nblock);	//valori di pi_greco ottenuti sui singoli blocchi
 
