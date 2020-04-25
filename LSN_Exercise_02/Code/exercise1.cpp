@@ -1,4 +1,5 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -21,7 +22,7 @@ int main (int argc, char *argv[]){
 
 	Random rnd = RandomGenerator();
 
-	int nblock = 100, nrand = 1E5;
+	int nblock = 100, nrand = 1E6;
 	double a = 0, b = 1;	//estremi di integrazione
 
 	double r, sum_uniform, sum_importance;
@@ -53,8 +54,8 @@ int main (int argc, char *argv[]){
 	ofstream MCuniform("../Files/uniform.out");		//genero l'output su un unico file di testo
 	ofstream MCimportance("../Files/importance.out");	
 	for(int i=0; i<nblock; i++){
-		MCuniform<<ave1[i]<<"  "<<err1[i]<<endl;
-		MCimportance<<ave2[i]<<"  "<<err2[i]<<endl;
+		MCuniform<<setprecision(9)<<ave1[i]<<"  "<<err1[i]<<endl;
+		MCimportance<<setprecision(9)<<ave2[i]<<"  "<<err2[i]<<endl;
 	}
 	MCuniform.close();
 	MCimportance.close();
