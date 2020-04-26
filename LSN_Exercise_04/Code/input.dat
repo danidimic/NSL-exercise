@@ -1,7 +1,7 @@
-0.8
+1.2
 108
-1.1
-2.2
+0.05
+5.0
 0.0005
 500000
 5000
@@ -21,3 +21,6 @@
 	ReadInput >> data_blocking;				0=false, 1=true
 	ReadInput >> nblock;
 	ReadInput >> instant;					0=false, 1=true
+
+1.05 t iniz
+20000 step
