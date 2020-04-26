@@ -21,6 +21,3 @@
 	ReadInput >> data_blocking;				0=false, 1=true
 	ReadInput >> nblock;
 	ReadInput >> instant;					0=false, 1=true
-
-1.05 t iniz
-20000 step
