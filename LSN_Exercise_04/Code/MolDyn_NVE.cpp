@@ -8,6 +8,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 #include <stdlib.h>     // srand, rand: to generate random number
+#include <iomanip>
 #include <iostream>     // cin, cout: Standard Input/Output Streams Library
 #include <fstream>      // Stream class to both read and write from/to files.
 #include <cmath>        // rint, pow
@@ -359,11 +360,11 @@ void Average_values(void){
 	err_pres = cumulative_error( ave_pres );
 
 	for(int i=0; i<nblock; i++){
-		Epot << i << "  " << cum_epot[i] << "  " << err_epot[i] << endl;
-		Ekin << i << "  " << cum_ekin[i] << "  " << err_ekin[i] << endl;
-		Temp << i << "  " << cum_temp[i] << "  " << err_temp[i] << endl;
-		Etot << i << "  " << cum_etot[i] << "  " << err_etot[i] << endl;
-		Pres << i << "  " << cum_pres[i] << "  " << err_pres[i] << endl;
+		Epot << i << setprecision(9) << "  " << cum_epot[i] << "  " << err_epot[i] << endl;
+		Ekin << i << setprecision(9) << "  " << cum_ekin[i] << "  " << err_ekin[i] << endl;
+		Temp << i << setprecision(9) << "  " << cum_temp[i] << "  " << err_temp[i] << endl;
+		Etot << i << setprecision(9) << "  " << cum_etot[i] << "  " << err_etot[i] << endl;
+		Pres << i << setprecision(9) << "  " << cum_pres[i] << "  " << err_pres[i] << endl;
 	}
 
 	Epot.close();
