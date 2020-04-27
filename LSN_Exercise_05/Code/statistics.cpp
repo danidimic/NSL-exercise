@@ -3,6 +3,7 @@
 #include <string>
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 using namespace std;
 
 
@@ -61,7 +62,7 @@ void data_blocking(vector<double> results, string path){
 	ofstream Output;
 	Output.open(path);
 	for(int i=0; i<nblock; i++){
-		Output<<ave[i]<<"  "<<err[i]<<endl;
+		Output<<setprecision(9)<<ave[i]<<"  "<<err[i]<<endl;
 	}
 	Output.close();
 

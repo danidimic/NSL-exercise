@@ -37,16 +37,7 @@ int main (int argc, char *argv[]){
 		pi[i] = (2*L*nthrow)/(M*d);
 	}
 
-	vector<double> ave(nblock), err(nblock);  //vettori necessari per immagazzinare i risultati finali
-	ave = cumulative_average(pi);	//medie progressive sui blocchi
-	err = cumulative_error(pi);	//incertezze statistiche sui singoli blocchi
-
-	ofstream Pi("../Files/pi.out");	
-	for(int i=0; i<nblock; i++){
-		Pi<<ave[i]<<"  "<<err[i]<<endl;
-	}
-	Pi.close();
-
+	data_blocking(pi, "../Files/pi.out");
 
 	rnd.SaveSeed();
 	return 0;

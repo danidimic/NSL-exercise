@@ -57,8 +57,6 @@ int main (int argc, char *argv[]){
 		//Random walk continuum
 		sum_cont[i] = sum_cont[i]/nrandwalk;		//media dei moduli quadri
 		sum2_cont[i] = sum2_cont[i]/nrandwalk;		//media dei quadrati dei moduli quadri
-
-		//cout<<sum_cube[i]<<"  "<<sum_cont[i]<<endl;
 	}
 
 	ofstream Cube("../Files/RWlattice.out");

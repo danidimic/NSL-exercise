@@ -13,8 +13,13 @@ using namespace std;
 #define r 0.1		//interesse privo di rischio
 #define sigma 0.25	//volatilità
 
-double max(double, double);
-
+//massimo tra due valori
+double max(double a, double b){
+	double Max;
+	if (a>b) Max=a;
+	else Max=b;
+	return Max;
+}
 
 int main (int argc, char *argv[]){
 
@@ -67,33 +72,11 @@ int main (int argc, char *argv[]){
 		P_discr[i] = sumP_discr/nstep;		//media put-option
 	}
 
-	//medie progressive simulazione diretta
-	vector<double> aveC_direct = cumulative_average( C_direct );	//media progressiva call-option
-	vector<double> errC_direct = cumulative_error(   C_direct );	//errore progressivo call-option
-	vector<double> aveP_direct = cumulative_average( P_direct );	//media progressiva call-option
-	vector<double> errP_direct = cumulative_error(   P_direct );	//errore progressivo call-option
-	//medie progressive simulazione discretizzata
-	vector<double> aveC_discr = cumulative_average( C_discr );		//media progressiva call-option
-	vector<double> errC_discr = cumulative_error(   C_discr );		//errore progressivo call-option
-	vector<double> aveP_discr = cumulative_average( P_discr );		//media progressiva call-option
-	vector<double> errP_discr = cumulative_error(   P_discr );		//errore progressivo call-option
-
-	ofstream Direct("../Files/direct.out");		//output calcolo diretto
-	ofstream Discr ("../Files/discr.out");		//output calcolo discretizzato
-	for(int i=0; i<nblock; i++){
-		Direct<<aveC_direct[i]<<"  "<<errC_direct[i]<<"  "<<aveP_direct[i]<<"  "<<errP_direct[i]<<endl;
-		Discr<<aveC_discr[i]<<"  "<<errC_discr[i]<<"  "<<aveP_discr[i]<<"  "<<errP_discr[i]<<endl;
-	}
-	Direct.close();
-	Discr.close();
+	data_blocking(C_direct, "../Files/Cdirect.out");
+	data_blocking(P_direct, "../Files/Pdirect.out");
+	data_blocking(C_discr, "../Files/Cdiscr.out" );
+	data_blocking(P_discr, "../Files/Pdiscr.out" );
 
 	rnd.SaveSeed();
 	return 0;
-}
-//massimo tra due valori
-double max(double a, double b){
-	double Max;
-	if (a>b) Max=a;
-	else Max=b;
-	return Max;
 }

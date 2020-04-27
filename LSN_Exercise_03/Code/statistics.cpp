@@ -1,6 +1,11 @@
 #include <vector>
+#include <fstream>
+#include <string>
 #include <cmath>
+#include <iostream>
+#include <iomanip>
 using namespace std;
+
 
 //calcolo delle medie progressive
 vector<double> cumulative_average( vector<double> v ){
@@ -45,6 +50,23 @@ vector<double> cumulative_error( vector<double> v ){
 		err[i] /= sqrt(i+1);
 	}
 	return err;
+}
+//risultati data blocking su file
+void data_blocking(vector<double> results, string path){
+
+	int nblock = results.size();
+	vector<double> ave(nblock), err(nblock);
+	ave = cumulative_average(results);
+	err = cumulative_error(results);
+	
+	ofstream Output;
+	Output.open(path);
+	for(int i=0; i<nblock; i++){
+		Output<<setprecision(9)<<ave[i]<<"  "<<err[i]<<endl;
+	}
+	Output.close();
+
+	return;
 }
 //calcolo del chi quadrato
 double chi_quadro( vector<double> oss, double E ){

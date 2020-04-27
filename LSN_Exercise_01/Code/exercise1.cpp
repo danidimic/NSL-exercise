@@ -22,9 +22,6 @@ int main (int argc, char *argv[]){
 	vector<double> ave(nblock);		//vettore per calcolo dei val medi
 	vector<double> var(nblock);		//vettore per calcolo varianza
 	vector<double> oss(nint);		//vettore per calcolo chi quadro
-
-	vector<double> r1(nblock), r1_err(nblock);	//vettori per valor medio e incertezze a blocchi
-	vector<double> r2(nblock), r2_err(nblock);	//vettori per varianza e incertezze a blocchi
 	vector<double> chi2(nblock);				//vettore per il chi quadro
 
 	for(int i=0; i<nblock; i++){
@@ -55,21 +52,12 @@ int main (int argc, char *argv[]){
 		}
 	}
 
-	r1 = cumulative_average(ave);		//medie progressive valor medio
-	r1_err = cumulative_error(ave);		//incertezze valor medio
-	r2 = cumulative_average(var);		//medie progressive varianza
-	r2_err = cumulative_error(var);		//incertezze varianza
+	data_blocking(ave, "../Files/ave.out");
+	data_blocking(var, "../Files/var.out");
 
-	ofstream Ave, Var, Chi;
-	Ave.open("../Files/ave.out");
-	Var.open("../Files/var.out");
+	ofstream Chi;
 	Chi.open("../Files/chi.out");
-
-	for(int i=0; i<nblock; i++){
-			Ave<<r1[i]<<"  "<<r1_err[i]<<endl;		//output valor medio
-			Var<<r2[i]<<"  "<<r2_err[i]<<endl;		//output varianza
-			Chi<<chi2[i]<<endl;						//output chi quadro
-	}
+	for(int i=0; i<nblock; i++) 	Chi<<chi2[i]<<endl;
 
 	rnd.SaveSeed();
 	return 0;
