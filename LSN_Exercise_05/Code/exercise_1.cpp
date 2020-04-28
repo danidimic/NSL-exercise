@@ -15,7 +15,6 @@ int main (int argc, char *argv[]){
 	int nthrows = 1E7, nblock = 500, nvalues = nthrows/nblock;
 	int naccept100 = 0, naccept210 = 0;
 	double alfa100, alfa210, s100, s210;
-
 	double Du100 = 1.2, Du210 = 3.15;	//delta transizione uniforme
 	double Dg100 = 0.75, Dg210 = 1.95;	//delta transizione gaussiana
 
@@ -25,6 +24,8 @@ int main (int argc, char *argv[]){
 	//punto di partenza sul massimo della pdf
 	current_pos100.fill(1.5/sqrt(3));
 	current_pos210.fill(5.0/sqrt(3));
+	//vettore per immagazzinare i punti
+	vector<double> points100(3*nvalues), points210(3*nvalues);
 
 	vector<double> r100(nblock), r210(nblock);	//vettori per le distanze r dei punti dall'origine
 
@@ -32,10 +33,10 @@ int main (int argc, char *argv[]){
 		s100 = 0;
 		s210 = 0;
 		for(int i=0; i<nvalues; i++){
-			//probabilità uniforme
+			//PROBABILITA UNIFORME
 			//transition100.imbue( [&]() {return rnd.Rannyu(-Du100, Du100);} );	
 			//transition210.imbue( [&]() {return rnd.Rannyu(-Du210, Du210);} );
-			//probabilità gaussiana	
+			//PROBABILITA NORMALE
 			transition100.imbue( [&]() {return rnd.Gauss(0, Dg100);} );	
 			transition210.imbue( [&]() {return rnd.Gauss(0, Dg210);} );	
 			
@@ -61,11 +62,11 @@ int main (int argc, char *argv[]){
 		r210[j] = s210/nvalues;
 	}
 
-	//risultati medie progressive su file (probabilità uniforme)
+	//risultati medie progressive su file (PROBABILITA UNIFORME)
 	//data_blocking(r100, "../Files/unif100.out");
 	//data_blocking(r210, "../Files/unif210.out");
 
-	//risultati medie progressive su file (probabilità uniforme)
+	//risultati medie progressive su file (PROBABILITA NORMALE)
 	data_blocking(r100, "../Files/gauss100.out");
 	data_blocking(r210, "../Files/gauss210.out");
 	
@@ -75,3 +76,4 @@ int main (int argc, char *argv[]){
 	rnd.SaveSeed();
 	return 0;
 }
+

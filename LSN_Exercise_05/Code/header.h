@@ -48,3 +48,5 @@ double pdf( double (*func) (double, double, double), vec v ){
 	p = abs( func(x, y, z) );
 	return pow(p, 2);
 }
+
+void write_points(vector<double>, string);
