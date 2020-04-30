@@ -1,10 +1,12 @@
-2.0
+1.999999999999994
 50
 1.0
 0.0
-0
+1
 20
 10000
+0
+1
 
   ReadInput >> temp;
   ReadInput >> nspin;
@@ -13,3 +15,5 @@
   ReadInput >> metro;
   ReadInput >> nblk;
   ReadInput >> nstep;
+  ReadInput >> restart;
+  ReadInput >> vsTemp;

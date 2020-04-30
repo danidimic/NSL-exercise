@@ -1,3 +1,13 @@
+/****************************************************************
+*****************************************************************
+    _/    _/  _/_/_/  _/       Numerical Simulation Laboratory
+   _/_/  _/ _/       _/       Physics Department
+  _/  _/_/    _/    _/       Universita' degli Studi di Milano
+ _/    _/       _/ _/       Prof. D.E. Galli
+_/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
+*****************************************************************
+*****************************************************************/
+
 #include <iostream>
 #include <fstream>
 #include <cmath>
@@ -12,42 +22,25 @@ Random :: ~Random(){}
 
 void Random :: SaveSeed(){
    ofstream WriteSeed;
-   WriteSeed.open("../Files/seed.out");
+   WriteSeed.open("seed.out");
    if (WriteSeed.is_open()){
       WriteSeed << l1 << " " << l2 << " " << l3 << " " << l4 << endl;;
-   } else cerr << "PROBLEM: Unable to open seed.out" << endl;
+   } else cerr << "PROBLEM: Unable to open random.out" << endl;
   WriteSeed.close();
   return;
 }
 
-//Generazione di numeri con distribuzione Gaussiana
 double Random :: Gauss(double mean, double sigma) {
    double s=Rannyu();
    double t=Rannyu();
    double x=sqrt(-2.*log(1.-s))*cos(2.*M_PI*t);
    return mean + x * sigma;
 }
-//Generazione di numeri con distribuzione Esponenziale
-double Random:: Expo(double lambda){
-	double x=0;
-	double y;
-	if(lambda != 0){
-		y=Rannyu();
-		x=-1/lambda*log(1-y);
-	}
-	return x;
-}
-//Generazione di numeri con distribuzione Lorentziana
-double Random:: Lorentz(double mu, double gamma){
-	double y=Rannyu();
-	double x=mu+gamma*tan( M_PI*(y-0.5) );
-	return x;
-}
-//Generazione di numeri uniformi nell'intervallo [min, max]
+
 double Random :: Rannyu(double min, double max){
    return min+(max-min)*Rannyu();
 }
-//Generazione di numeri uniformi nell'intervallo [0, 1]
+
 double Random :: Rannyu(void){
   const double twom12=0.000244140625;
   int i1,i2,i3,i4;
@@ -66,13 +59,6 @@ double Random :: Rannyu(void){
   r=twom12*(l1+twom12*(l2+twom12*(l3+twom12*(l4))));
 
   return r;
-}
-//Generazioni di valori uniformi sulla sfera
-double* Random:: Sphere(){
-	double* s = new double[2];
-	s[0] = acos( 2*Rannyu()-1 );		//angolo theta
-	s[1] = Rannyu(0, 2*M_PI);			//angolo phi
-	return s;	
 }
 
 void Random :: SetRandom(int * s, int p1, int p2){
@@ -93,30 +79,12 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 }
 
-Random RandomGenerator(){
-
-	Random rnd;
-
-	int seed[4];
- 	int p1, p2;
-  	ifstream Primes("../Files/Primes");
-  	if (Primes.is_open()){
-		Primes >> p1 >> p2 ;
-  	} else cerr << "PROBLEM: Unable to open Primes" << endl;
-  	Primes.close();
-
-  	ifstream input("../Files/seed.in");
-  	string property;
-  	if (input.is_open()){
-		while ( !input.eof() ){
-			input >> property;
-			if( property == "RANDOMSEED" ){
-				input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
-				rnd.SetRandom(seed,p1,p2);
-			}
-		}
-		input.close();
-	} else cerr << "PROBLEM: Unable to open seed.in" << endl;
-
-	return rnd;
-}	
+/****************************************************************
+*****************************************************************
+    _/    _/  _/_/_/  _/       Numerical Simulation Laboratory
+   _/_/  _/ _/       _/       Physics Department
+  _/  _/_/    _/    _/       Universita' degli Studi di Milano
+ _/    _/       _/ _/       Prof. D.E. Galli
+_/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
+*****************************************************************
+*****************************************************************/
