@@ -204,10 +204,12 @@ void Averages(int iblk){ //Print results for current block
     
 	ofstream Ene, Heat, Mag, Chi;
 	const int wd=12;
-    
-//	cout << "Block number " << iblk << endl;
-//	cout << "Acceptance rate " << accepted/attempted << endl;
-//	cout << "----------------------------" << endl << endl;
+   
+	if (vsTemp==0){
+		cout << "Block number " << iblk << endl;
+		cout << "Acceptance rate " << accepted/attempted << endl;
+		cout << "----------------------------" << endl << endl;
+	}
     
 	Ene.open("results/ave_ene.out", ios::app);
 	Heat.open("results/ave_heat.out", ios::app);
@@ -249,10 +251,10 @@ void Averages(int iblk){ //Print results for current block
 		Mag.open("results/Mag.out", ios::app);
 		Chi.open("results/Chi.out", ios::app);
 
-		Ene << setw(5) << temp << setw(wd) << glob_av[iu]/(double)iblk << setw(15) << err_u << endl;
-		Heat << setw(5) << temp << setw(wd) << glob_av[ic]/(double)iblk << setw(15) << err_c << endl;
-		Mag << setw(5) << temp  << setw(wd) << glob_av[im]/(double)iblk << setw(15) << err_m << endl;
-		Chi << setw(5) << temp  << setw(wd) << glob_av[ix]/(double)iblk << setw(15) << err_x << endl;
+		Ene  << temp << "  " << glob_av[iu]/(double)iblk << "  " << err_u << endl;
+		Heat << temp << "  " << glob_av[ic]/(double)iblk << "  " << err_c << endl;
+		Mag  << temp << "  " << glob_av[im]/(double)iblk << "  " << err_m << endl;
+		Chi  << temp << "  " << glob_av[ix]/(double)iblk << "  " << err_x << endl;
 
 		Ene.close();
 		Heat.close();
