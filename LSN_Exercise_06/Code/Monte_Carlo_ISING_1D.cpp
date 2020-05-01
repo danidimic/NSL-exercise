@@ -45,17 +45,6 @@ void Input(void){
 	cout << "Boltzmann weight exp(- beta * H ), beta = 1/T " << endl << endl;
 	cout << "The program uses k_B=1 and mu_B=1 units " << endl;
 
-	//Read seed for random numbers
-	int p1, p2;
-	ifstream Primes("Primes");
-	Primes >> p1 >> p2 ;
-	Primes.close();
-
-	ifstream input("seed.in");
-	input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
-	rnd.SetRandom(seed,p1,p2);
-	input.close();
-  
 	//Read input informations
   ReadInput.open("input.dat");
 
@@ -79,6 +68,8 @@ void Input(void){
 	ReadInput >> restart;
 	ReadInput >> vsTemp;		//misure in funzione della temperatura
 
+	rnd = RandomGenerator(restart);		//imposto il generatore di numeri casuali
+
   if(metro==1) cout << "The program perform Metropolis moves" << endl;
   else cout << "The program perform Gibbs moves" << endl;
   cout << "Number of blocks = " << nblk << endl;
@@ -98,6 +89,7 @@ void Input(void){
 		ReadInput.open("config.final");
 		for(int i=0; i<nspin; i++)
 			ReadInput >> s[i];
+		ReadInput.close();
 	}
 	//random initial configuration
 	else{
@@ -261,6 +253,7 @@ void Averages(int iblk){ //Print results for current block
 		Mag.close();
 		Chi.close();
 	}
+	
 	return;
 }
 
