@@ -102,34 +102,34 @@ void Input(void){
 	//Evaluate energy etc. of the initial configuration
 	Measure();
 	//Print initial values for the potential energy and virial
-  cout << "Initial energy = " << walker[iu]/(double)nspin << endl;
+  cout << "Initial energy = " << walker[iu] << endl;
 }
 
 
 void Move(int metro){
 	int o;
-	double A, delta_energy, p;
+	double A, delta_energy, pup;
 
 	for(int i=0; i<nspin; ++i){
 		//Select randomly a particle
 		o = (int)(rnd.Rannyu()*nspin);
 
 		if(metro==1){ //Metropolis
-			delta_energy = Boltzmann(s[o], o);
-			A = exp( -beta * delta_energy);
+			delta_energy = Boltzmann(o);
+			A = Min(1, exp( -beta * delta_energy) );
 
 			if( rnd.Rannyu()<A ){
 				s[o] *= -1;
-	   			accepted++;
+	   		accepted++;
 			}
 			attempted++;			
 		}
 
 		else{ //Gibbs sampling
 			delta_energy = Gibbs(o);
-			p = 1 / ( 1+exp(delta_energy) );
+			pup = 1 / ( 1+exp(-beta*delta_energy) );
 
-			if( rnd.Rannyu()<p ) 
+			if( rnd.Rannyu()<pup ) 
 				s[o] = 1;
 			else
 				s[o] = -1;
@@ -138,30 +138,37 @@ void Move(int metro){
 	return;
 }
 
-double Gibbs(int ip){
-	double ene = -2 * beta * J *( s[Pbc(ip-1)] + s[Pbc(ip+1)] );
-	return ene;
+
+double Boltzmann(int ip){
+  double ene = 2 * (J * s[ip] * ( s[Pbc(ip-1)] + s[Pbc(ip+1)] ) + h * s[ip]);
+  return ene;
 }
 
-double Boltzmann(int sm, int ip){
-	double ene = -J * sm * ( s[Pbc(ip-1)] + s[Pbc(ip+1)] ) - h * sm;
+double Gibbs(int ip){
+	double ene = -2 * (J * ( s[Pbc(ip-1)] + s[Pbc(ip+1)] ) + h);  
 	return ene;
 }
 
 void Measure(){
-	double u = 0.0, u2 = 0.0, m = 0.0;
+	double u = 0.0, u2 = 0.0, m = 0.0, ene;
 
 	//cycle over spins
 	for (int i=0; i<nspin; ++i){
-		u  += -J * s[i] * s[Pbc(i+1)] - 0.5 * h * (s[i] + s[Pbc(i+1)]);
-		u2 += pow(u, 2);
+		ene = -J * s[i] * s[Pbc(i+1)] - 0.5 * h * (s[i] + s[Pbc(i+1)]);
+
+		u  += ene;
+		u2 += pow(ene, 2);
 		m  += s[i];
   }
 	//immagazzino i valori istantanei
-	walker[iu] = u;														//energia
-	walker[ic] = pow(beta, 2) * (u2 - u*u);		//capacità termica
-	walker[im] = m;														//magnetizzazione
-	walker[ix] = beta * pow(m,2);							//susciettività
+	walker[iu] = u;													//energia
+	walker[ix] = beta * pow(m,2);						//susciettività
+	walker[im] = m;													//magnetizzazione
+
+	u2 /= (double)nspin;
+	u /= (double)nspin;
+	walker[ic] = beta*beta * (u2 - u*u);		//capacità termica
+
 	return;
 }
 
@@ -238,10 +245,15 @@ void Averages(int iblk){ //Print results for current block
 	Chi.close();
 
 	if( iblk==nblk && vsTemp==1 ){			//scrivi risultati per grafici vs temperatura 
-		Ene.open("results/Ene.out", ios::app);
-		Heat.open("results/Heat.out", ios::app);
-		Mag.open("results/Mag.out", ios::app);
-		Chi.open("results/Chi.out", ios::app);
+
+		string s;
+		if(metro==1)	s="metro";
+		else 	s="Gibbs";
+
+		Ene.open("results/Ene_" + s + ".out", ios::app);
+		Heat.open("results/Heat_" + s + ".out", ios::app);
+		Mag.open("results/Mag_" + s + ".out", ios::app);
+		Chi.open("results/Chi_" + s + ".out", ios::app);
 
 		Ene  << temp << "  " << glob_av[iu]/(double)iblk << "  " << err_u << endl;
 		Heat << temp << "  " << glob_av[ic]/(double)iblk << "  " << err_c << endl;
@@ -282,7 +294,14 @@ int Pbc(int i){  //Algorithm for periodic boundary conditions
 double Error(double sum, double sum2, int iblk){
 	return sqrt((sum2/(double)iblk - pow(sum/(double)iblk,2))/(double)iblk);
 }
- 
+
+
+double Min(double a, double b){
+	double m;
+	if( a<b)	m=a;
+	else			m=b;
+	return m;
+}
 
 /****************************************************************
 *****************************************************************

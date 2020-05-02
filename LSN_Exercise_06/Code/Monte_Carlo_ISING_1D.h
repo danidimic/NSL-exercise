@@ -49,8 +49,9 @@ void ConfFinal(void);
 void Measure(void);
 int Pbc(int);
 double Gibbs(int);
-double Boltzmann(int, int);
+double Boltzmann(int);
 double Error(double,double,int);
+double Min(double, double);
 
 #endif
 
