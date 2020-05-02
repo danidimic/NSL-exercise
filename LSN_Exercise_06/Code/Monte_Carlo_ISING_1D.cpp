@@ -145,7 +145,7 @@ double Boltzmann(int ip){
 }
 
 double Gibbs(int ip){
-	double ene = -2 * (J * ( s[Pbc(ip-1)] + s[Pbc(ip+1)] ) + h);  
+	double ene = 2 * ( J*( s[Pbc(ip-1)] + s[Pbc(ip+1)] ) + h);  
 	return ene;
 }
 
@@ -165,8 +165,8 @@ void Measure(){
 	walker[ix] = beta * pow(m,2);						//susciettività
 	walker[im] = m;													//magnetizzazione
 
+	u  /= (double)nspin;
 	u2 /= (double)nspin;
-	u /= (double)nspin;
 	walker[ic] = beta*beta * (u2 - u*u);		//capacità termica
 
 	return;
