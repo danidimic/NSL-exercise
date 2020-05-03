@@ -1,12 +1,13 @@
 2.0
 50
 1.0
-0.02
-1
+0.0
+0
 20
 10000
+1
 0
-0
+1
 
   ReadInput >> temp;
   ReadInput >> nspin;
@@ -15,5 +16,7 @@
   ReadInput >> metro;
   ReadInput >> nblk;
   ReadInput >> nstep;
-  ReadInput >> restart;
-  ReadInput >> vsTemp;
+  ReadInput >> restart;			//restart del programma da config.final
+	ReadInput >> instant;			//stampa su file valori istantanei
+  ReadInput >> vsTemp;			//grafici in funzione della temperatura
+

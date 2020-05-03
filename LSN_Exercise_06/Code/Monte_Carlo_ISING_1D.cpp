@@ -65,7 +65,9 @@ void Input(void){
 
   ReadInput >> nblk;
   ReadInput >> nstep;
-	ReadInput >> restart;
+
+	ReadInput >> restart;		//restart da configurazione precedente
+	ReadInput >> instant; 	//stampa misure istantanee
 	ReadInput >> vsTemp;		//misure in funzione della temperatura
 
 	rnd = RandomGenerator(restart);		//imposto il generatore di numeri casuali
@@ -169,6 +171,23 @@ void Measure(){
 	u2 /= (double)nspin;
 	walker[ic] = beta*beta * (u2 - u*u);		//capacità termica
 
+	if(instant==1){
+		ofstream Ene, Heat, Mag, Chi;
+		Ene.open("results/ist_ene.out", ios::app);
+		Heat.open("results/ist_heat.out", ios::app);
+		Mag.open("results/ist_mag.out", ios::app);
+		Chi.open("results/ist_chi.out", ios::app);
+
+		Ene<<walker[iu]/(double)nspin<<endl;
+		Heat<<walker[ic]<<endl;
+		Mag<<walker[im]/(double)nspin<<endl;
+		Chi<<walker[ix]/(double)nspin<<endl;
+
+		Ene.close();
+		Heat.close();
+		Mag.close();
+		Chi.close();
+	}
 	return;
 }
 
@@ -204,45 +223,46 @@ void Averages(int iblk){ //Print results for current block
 	ofstream Ene, Heat, Mag, Chi;
 	const int wd=12;
    
-	if (vsTemp==0){
-		cout << "Block number " << iblk << endl;
-		cout << "Acceptance rate " << accepted/attempted << endl;
-		cout << "----------------------------" << endl << endl;
-	}
-    
-	Ene.open("results/ave_ene.out", ios::app);
-	Heat.open("results/ave_heat.out", ios::app);
-	Mag.open("results/ave_mag.out", ios::app);
-	Chi.open("results/ave_chi.out", ios::app);
-
 	stima_u = blk_av[iu]/blk_norm/(double)nspin; //Energy
 	glob_av[iu]  += stima_u;
 	glob_av2[iu] += stima_u*stima_u;
 	err_u=Error(glob_av[iu],glob_av2[iu],iblk);
-	Ene << setw(5) << iblk <<  setw(wd) << stima_u << setw(wd) << glob_av[iu]/(double)iblk << setw(15) << err_u << endl;
 
-	stima_c = blk_av[ic]/blk_norm/(double)nspin; //Heat
+	stima_c = blk_av[ic]/blk_norm; //Heat
 	glob_av[ic]  += stima_c;
 	glob_av2[ic] += stima_c*stima_c;
 	err_c=Error(glob_av[ic],glob_av2[ic],iblk);
-	Heat << setw(5) << iblk <<  setw(wd) << stima_c << setw(wd) << glob_av[ic]/(double)iblk << setw(15) << err_c << endl;
 
 	stima_m = blk_av[im]/blk_norm/(double)nspin; //Magnetization
 	glob_av[im]  += stima_m;
 	glob_av2[im] += stima_m*stima_m;
 	err_m=Error(glob_av[im],glob_av2[im],iblk);
-	Mag << setw(5) << iblk <<  setw(wd) << stima_m << setw(wd) << glob_av[im]/(double)iblk << setw(15) << err_m << endl;
 
 	stima_x = blk_av[ix]/blk_norm/(double)nspin; //Susceptivity
 	glob_av[ix]  += stima_x;
 	glob_av2[ix] += stima_x*stima_x;
 	err_x=Error(glob_av[ix],glob_av2[ix],iblk);
-	Chi << setw(5) << iblk <<  setw(wd) << stima_x << setw(wd) << glob_av[ix]/(double)iblk << setw(15) << err_x << endl;
 
-	Ene.close();
-	Heat.close();
-	Mag.close();
-	Chi.close();
+	if (vsTemp==0){		//scrivi risultati medi sui vari blocchi
+		cout << "Block number " << iblk << endl;
+		cout << "Acceptance rate " << accepted/attempted << endl;
+		cout << "----------------------------" << endl << endl;
+
+		Ene.open("results/ave_ene.out", ios::app);
+		Heat.open("results/ave_heat.out", ios::app);
+		Mag.open("results/ave_mag.out", ios::app);
+		Chi.open("results/ave_chi.out", ios::app);
+
+		Ene << setw(5) << iblk <<  setw(wd) << stima_u << setw(wd) << glob_av[iu]/(double)iblk << setw(15) << err_u << endl;
+		Heat << setw(5) << iblk <<  setw(wd) << stima_c << setw(wd) << glob_av[ic]/(double)iblk << setw(15) << err_c << endl;
+		Mag << setw(5) << iblk <<  setw(wd) << stima_m << setw(wd) << glob_av[im]/(double)iblk << setw(15) << err_m << endl;
+		Chi << setw(5) << iblk <<  setw(wd) << stima_x << setw(wd) << glob_av[ix]/(double)iblk << setw(15) << err_x << endl;
+
+		Ene.close();
+		Heat.close();
+		Mag.close();
+		Chi.close();
+	}
 
 	if( iblk==nblk && vsTemp==1 ){			//scrivi risultati per grafici vs temperatura 
 
