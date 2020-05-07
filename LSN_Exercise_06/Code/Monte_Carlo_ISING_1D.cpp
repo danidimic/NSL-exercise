@@ -104,7 +104,7 @@ void Input(void){
 	//Evaluate energy etc. of the initial configuration
 	Measure();
 	//Print initial values for the potential energy and virial
-  cout << "Initial energy = " << walker[iu] << endl;
+  cout << "Initial energy = " << walker[iu]/(double)nspin << endl;
 }
 
 
