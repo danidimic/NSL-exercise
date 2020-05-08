@@ -36,7 +36,7 @@ int npart;
 double beta,temp,vol,rho,box,rcut;
 
 // simulation
-int nstep, nblk;
+int nstep, nblk, print;
 double delta;
 
 //pigreco
@@ -51,6 +51,7 @@ void Move(void);
 void ConfFinal(void);
 void ConfXYZ(int);
 void Measure(void);
+void Print(int);
 double Boltzmann(double, double, double, int);
 double Pbc(double);
 double Error(double,double,int);

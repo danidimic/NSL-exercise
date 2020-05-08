@@ -17,33 +17,34 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 
 using namespace std;
 
-int main()
-{ 
-  Input(); //Inizialization
-  int nconf = 1;
-  for(int iblk=1; iblk <= nblk; ++iblk) //Simulation
-  {
-    Reset(iblk);   //Reset block averages
-    for(int istep=1; istep <= nstep; ++istep)
-    {
-      Move();
-      Measure();
-      Accumulate(); //Update block averages
-      if(istep%10 == 0){
-        ConfXYZ(nconf);//Write actual configuration in XYZ format //Commented to avoid "filesystem full"! 
-        nconf += 1;
-      }
-    }
-    Averages(iblk);   //Print results for current block
-  }
-  ConfFinal(); //Write final configuration
+int main(){
 
-  return 0;
+	Input(); 							//Inizialization
+	int nconf = 1;
+	for(int iblk=1; iblk <= nblk; ++iblk){ //Simulation
+
+		Reset(iblk);   			//Reset block averages
+		for(int istep=1; istep <= nstep; ++istep){
+
+			Move();
+			Measure();
+			//Print(istep);				//Print istant values
+			Accumulate(); 				//Update block averages
+			if(istep%10 == 0){
+				//ConfXYZ(nconf);		//Write actual configuration in XYZ format //Commented to avoid "filesystem full"! 
+				nconf += 1;
+			}
+		}
+		Averages(iblk);   //Print results for current block
+	}
+	ConfFinal();			 //Write final configuration
+    cout << "Acceptance rate " << accepted/attempted << endl << endl;
+
+	return 0;
 }
 
 
-void Input(void)
-{
+void Input(void){
   ifstream ReadInput,ReadConf;
 
   cout << "Classic Lennard-Jones fluid        " << endl;
@@ -52,23 +53,23 @@ void Input(void)
   cout << "Boltzmann weight exp(- beta * sum_{i<j} v(r_ij) ), beta = 1/T " << endl << endl;
   cout << "The program uses Lennard-Jones units " << endl;
 
-//Read seed for random numbers
-   int p1, p2;
-   ifstream Primes("Primes");
-   Primes >> p1 >> p2 ;
-   Primes.close();
+	//Read seed for random numbers
+	int p1, p2;
+	ifstream Primes("Primes");
+	Primes >> p1 >> p2 ;
+	Primes.close();
 
-   ifstream input("seed.in");
-   input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
-   rnd.SetRandom(seed,p1,p2);
-   input.close();
+	ifstream input("seed.in");
+	input >> seed[0] >> seed[1] >> seed[2] >> seed[3];
+	rnd.SetRandom(seed,p1,p2);
+	input.close();
   
-//Read input informations
-  ReadInput.open("input.dat");
+	//Read input informations
+	ReadInput.open("input.dat");
 
-  ReadInput >> temp;
-  beta = 1.0/temp;
-  cout << "Temperature = " << temp << endl;
+	ReadInput >> temp;
+	beta = 1.0/temp;
+	cout << "Temperature = " << temp << endl;
 
   ReadInput >> npart;
   cout << "Number of particles = " << npart << endl;
@@ -102,23 +103,22 @@ void Input(void)
   ReadInput.close();
 
 
-//Prepare arrays for measurements
-  iv = 0; //Potential energy
+	//Prepare arrays for measurements
+	iv = 0; //Potential energy
   iw = 1; //Virial
  
   n_props = 2; //Number of observables
 
-//measurement of g(r)
+	//measurement of g(r)
   igofr = 2;
   nbins = 100;
   n_props = n_props + nbins;
   bin_size = (box/2.0)/(double)nbins;
 
-//Read initial configuration
-  cout << "Read initial configuration from file config.0 " << endl << endl;
-  ReadConf.open("config.0");
-  for (int i=0; i<npart; ++i)
-  {
+	//Read initial configuration
+	cout << "Read initial configuration from file config.0 " << endl << endl;
+	ReadConf.open("config.0");
+	for (int i=0; i<npart; ++i){
     ReadConf >> x[i] >> y[i] >> z[i];
     x[i] = Pbc( x[i] * box );
     y[i] = Pbc( y[i] * box );
@@ -126,55 +126,53 @@ void Input(void)
   }
   ReadConf.close();
   
-//Evaluate potential energy and virial of the initial configuration
-  Measure();
+	//Evaluate potential energy and virial of the initial configuration
+	Measure();
 
-//Print initial values for the potential energy and virial
-  cout << "Initial potential energy (with tail corrections) = " << walker[iv]/(double)npart + vtail << endl;
-  cout << "Virial                   (with tail corrections) = " << walker[iw]/(double)npart + ptail << endl;
-  cout << "Pressure                 (with tail corrections) = " << rho * temp + (walker[iw] + (double)npart * ptail) / vol << endl << endl;
+	//Print initial values for the potential energy and virial
+	cout << "Initial potential energy (with tail corrections) = " << walker[iv]/(double)npart + vtail << endl;
+	cout << "Virial                   (with tail corrections) = " << walker[iw]/(double)npart + ptail << endl;
+	cout << "Pressure                 (with tail corrections) = " << rho * temp + (walker[iw] + (double)npart * ptail) / vol << endl << endl;
 }
 
 
-void Move(void)
-{
-  int o;
-  double p, energy_old, energy_new;
-  double xold, yold, zold, xnew, ynew, znew;
+void Move(void){
+	int o;
+	double p, energy_old, energy_new;
+	double xold, yold, zold, xnew, ynew, znew;
 
 
-  for(int i=0; i<npart; ++i)
-  {
-  //Select randomly a particle (for C++ syntax, 0 <= o <= npart-1)
-    o = (int)(rnd.Rannyu()*npart);
+	for(int i=0; i<npart; ++i){
+		//Select randomly a particle (for C++ syntax, 0 <= o <= npart-1)
+		o = (int)(rnd.Rannyu()*npart);
 
-  //Old
+		//Old
     xold = x[o];
     yold = y[o];
     zold = z[o];
 
     energy_old = Boltzmann(xold,yold,zold,o);
 
-  //New
+  	//New
     xnew = Pbc( x[o] + delta*(rnd.Rannyu() - 0.5) );
     ynew = Pbc( y[o] + delta*(rnd.Rannyu() - 0.5) );
     znew = Pbc( z[o] + delta*(rnd.Rannyu() - 0.5) );
 
     energy_new = Boltzmann(xnew,ynew,znew,o);
 
-  //Metropolis test
-    p = exp(beta*(energy_old-energy_new));
-    if(p >= rnd.Rannyu())  
-    {
-    //Update
-       x[o] = xnew;
-       y[o] = ynew;
-       z[o] = znew;
+  	//Metropolis test
+		p = exp(beta*(energy_old-energy_new));
+		if(p >= rnd.Rannyu()) { 
+			//Update
+			x[o] = xnew;
+			y[o] = ynew;
+			z[o] = znew;
     
-       accepted = accepted + 1.0;
-    }
-    attempted = attempted + 1.0;
-  }
+			accepted = accepted + 1.0;
+		}
+		attempted = attempted + 1.0;
+	}
+
 }
 
 double Boltzmann(double xx, double yy, double zz, int ip)
@@ -204,51 +202,76 @@ double Boltzmann(double xx, double yy, double zz, int ip)
   return 4.0*ene;
 }
 
-void Measure()
-{
-  int bin;
+
+void Measure(){
+
   double v = 0.0, w = 0.0;
   double vij, wij;
   double dx, dy, dz, dr;
+	double min, max, dl;
+	dl = 0.5*box/nbins;
 
-//reset the hystogram of g(r)
-  for (int k=igofr; k<igofr+nbins; ++k) walker[k]=0.0;
+	//reset the hystogram of g(r)
+	for (int k=igofr; k<igofr+nbins; ++k) walker[k]=0.0;
 
-//cycle over pairs of particles
-  for (int i=0; i<npart-1; ++i)
-  {
-    for (int j=i+1; j<npart; ++j)
-    {
+	//cycle over pairs of particles
+	for (int i=0; i<npart-1; ++i){
 
-// distance i-j in pbc
-     dx = Pbc(x[i] - x[j]);
-     dy = Pbc(y[i] - y[j]);
-     dz = Pbc(z[i] - z[j]);
+		for (int j=i+1; j<npart; ++j){
 
-     dr = dx*dx + dy*dy + dz*dz;
-     dr = sqrt(dr);
+			//distance i-j in pbc
+			dx = Pbc(x[i] - x[j]);
+			dy = Pbc(y[i] - y[j]);
+			dz = Pbc(z[i] - z[j]);
 
-//update of the histogram of g(r)
+			dr = dx*dx + dy*dy + dz*dz;
+			dr = sqrt(dr);
 
-     if(dr < rcut)
-     {
-       vij = 1.0/pow(dr,12) - 1.0/pow(dr,6);
-       wij = 1.0/pow(dr,12) - 0.5/pow(dr,6);
+			//update of the histogram of g(r)
+			for (int k=0; k<nbins; ++k){
+					min = k*dl;
+					max =(k+1)*dl;
+					
+					if( dr>min && dr<max )	walker[k+igofr] += 2;
+			}
 
-// contribution to energy and virial
-       v += vij;
-       w += wij;
-     }
-    }          
-  }
+			if(dr < rcut){
+				vij = 1.0/pow(dr,12) - 1.0/pow(dr,6);
+				wij = 1.0/pow(dr,12) - 0.5/pow(dr,6);
+
+				//contribution to energy and virial
+				v += vij;
+				w += wij;
+			}
+
+		}          
+	}
 
   walker[iv] = 4.0 * v;
   walker[iw] = 48.0 * w / 3.0;
+
 }
 
+void Print(int istep){
+	
+	if(istep%10000 == 0)
+		cout<<"step: "<<istep<<endl;
+	double u, p;
+	u = walker[iv] / (double)npart; //Potential energy per particle
+	p = rho*temp + walker[iw] / (3*vol);	//Pressure
 
-void Reset(int iblk) //Reset block averages
-{
+	ofstream Ene, Pres;
+	Ene.open("results/istant_ene.out", ios::app);
+	Pres.open("results/istant_pres.out", ios::app);
+
+	Ene  << u << endl;
+	Pres << p << endl;
+
+	Ene.close();
+	Pres.close();
+}
+
+void Reset(int iblk){ //Reset block averages
    
    if(iblk == 1)
    {
@@ -280,43 +303,67 @@ void Accumulate(void) //Update block averages
 }
 
 
-void Averages(int iblk) //Print results for current block
-{
+void Averages(int iblk){ //Print results for current block
     
-   double r, gdir;
-   ofstream Gofr, Gave, Epot, Pres;
-   const int wd=12;
+	ofstream Gofr, Gave, Epot, Pres;
+	const int wd=12;
+	double r, gdir, dl, deltaV, min, max;
+	dl = 0.5*box/nbins;
     
-    cout << "Block number " << iblk << endl;
-    cout << "Acceptance rate " << accepted/attempted << endl << endl;
+	cout << "Block number " << iblk << endl;
+	cout << "Acceptance rate " << accepted/attempted << endl << endl;
+		  
+	Epot.open("results/output.epot.0",ios::app);
+	Pres.open("results/output.pres.0",ios::app);
+	Gofr.open("results/output.gofr.0",ios::app);
     
-    Epot.open("output.epot.0",ios::app);
-    Pres.open("output.pres.0",ios::app);
-    Gofr.open("output.gofr.0",ios::app);
-    Gave.open("output.gave.0",ios::app);
+	stima_pot = blk_av[iv]/blk_norm/(double)npart + vtail; //Potential energy
+	glob_av[iv] += stima_pot;
+	glob_av2[iv] += stima_pot*stima_pot;
+	err_pot=Error(glob_av[iv],glob_av2[iv],iblk);
     
-    stima_pot = blk_av[iv]/blk_norm/(double)npart + vtail; //Potential energy
-    glob_av[iv] += stima_pot;
-    glob_av2[iv] += stima_pot*stima_pot;
-    err_pot=Error(glob_av[iv],glob_av2[iv],iblk);
-    
-    stima_pres = rho * temp + (blk_av[iw]/blk_norm + ptail * (double)npart) / vol; //Pressure
-    glob_av[iw] += stima_pres;
-    glob_av2[iw] += stima_pres*stima_pres;
-    err_press=Error(glob_av[iw],glob_av2[iw],iblk);
+	stima_pres = rho * temp + (blk_av[iw]/blk_norm + ptail * (double)npart) / vol; //Pressure
+	glob_av[iw] += stima_pres;
+	glob_av2[iw] += stima_pres*stima_pres;
+	err_press=Error(glob_av[iw],glob_av2[iw],iblk);
 
-//Potential energy per particle
-    Epot << setw(wd) << iblk <<  setw(wd) << stima_pot << setw(wd) << glob_av[iv]/(double)iblk << setw(wd) << err_pot << endl;
-//Pressure
-    Pres << setw(wd) << iblk <<  setw(wd) << stima_pres << setw(wd) << glob_av[iw]/(double)iblk << setw(wd) << err_press << endl;
+	//Potential energy per particle
+	Epot << setw(wd) << iblk <<  setw(wd) << stima_pot << setw(wd) << glob_av[iv]/(double)iblk << setw(wd) << err_pot << endl;
+	//Pressure
+	Pres << setw(wd) << iblk <<  setw(wd) << stima_pres << setw(wd) << glob_av[iw]/(double)iblk << setw(wd) << err_press << endl;
 
-//g(r)
+	//g(r)
+	for (int k=0; k<nbins; ++k){
+		min = k*dl;
+		max =(k+1)*dl;
+		deltaV = 4/3*pi * ( pow(max,3)-pow(min,3) );
+		walker[k+igofr] /= (rho*npart*deltaV);
 
-    cout << "----------------------------" << endl << endl;
+		r = (max-min)/2 + min;
+		gdir = walker[k+igofr]/blk_norm;
+		//Block averages per gdir
+		Gofr << setw(wd) << iblk <<  setw(wd) << r << setw(wd) << gdir << endl;
 
-    Epot.close();
-    Pres.close();
-    Gofr.close();
+		glob_av[k+igofr] += gdir;
+		glob_av2[k+igofr] += gdir*gdir;
+
+		//Global averages
+		if(iblk==nblk){
+			gdir = glob_av[k+igofr]/(double)iblk;
+			err_gdir = Error(glob_av[k+igofr],glob_av2[k+igofr],iblk);
+
+			Gave.open("results/output.gave.0",ios::app);
+			Gave << setw(wd) << r <<  setw(wd) << gdir << setw(wd) << err_gdir << endl;
+			Gave.close();
+		}
+	}
+	Gofr << endl;
+
+	cout << "----------------------------" << endl << endl;
+
+	Epot.close();
+	Pres.close();
+	Gofr.close();
 }
 
 
