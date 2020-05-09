@@ -19,7 +19,8 @@ using namespace std;
 int main(){ 
 	Input();             //Inizialization
 	//int nconf = 1;
-	int nmeas = 0, iblock = 0;
+	iblock = 0;
+	int nmeas = 0;
 
 	for(int istep=1; istep <= nstep; ++istep){
 		Move();           //Move particles with Verlet algorithm
@@ -32,36 +33,19 @@ int main(){
 			//ConfXYZ(nconf);		//Write actual configuration in XYZ format
 			//nconf += 1;
 
-			if(data_blocking==true){	//somme su ciascun blocco
-				ave_epot.at(iblock) += stima_pot;
-				ave_ekin.at(iblock) += stima_kin;
-				ave_temp.at(iblock) += stima_temp;
-				ave_etot.at(iblock) += stima_etot;
-				ave_pres.at(iblock) += stima_pres;
-
-				if(nmeas%nvalues==0){		//valori medi su ciascun blocco
-					ave_epot.at(iblock) /= nvalues;
-					ave_ekin.at(iblock) /= nvalues;
-					ave_temp.at(iblock) /= nvalues;
-					ave_etot.at(iblock) /= nvalues;
-					ave_pres.at(iblock) /= nvalues;
-					iblock++;
-				}
-			}//data-blocking
-		}//measure
+			if(blocking==true) Accumulate(nmeas);	//somme su ciascun blocco
+		}
 	}
 	
-	if(data_blocking==true) 
-		Average_values();			//Write average values
+	if(blocking==true) Average();			//Write average values
 
-  ConfFinal();				//Write final configuration to restart
+  ConfFinal();	//Write final configuration to restart
   return 0;
 }
 
 
 void Input(void){ //Prepare all stuff for the simulation
   ifstream ReadInput, ReadConf;
-  double ep, ek, pr, et, vir;
 
   cout << "Classic Lennard-Jones fluid        " << endl;
   cout << "Molecular dynamics simulation in NVE ensemble  " << endl << endl;
@@ -84,6 +68,7 @@ void Input(void){ //Prepare all stuff for the simulation
   cout << "Volume of the simulation box = " << vol << endl;
   box = pow(vol,1.0/3.0);
   cout << "Edge of the simulation box = " << box << endl;
+	dl = 0.5*box/nbins;
 
   ReadInput >> rcut;
   ReadInput >> delta;
@@ -94,17 +79,18 @@ void Input(void){ //Prepare all stuff for the simulation
 	//ReadConf.open("old.0");
 	//restart = ReadConf.is_open();
 
-	ReadInput >> data_blocking;
+	ReadInput >> blocking;
 	ReadInput >> nblock;
 	nvalues = nstep/(10*nblock);
 	ReadInput >> instant;
 
-	if(data_blocking==true){
+	if(blocking==true){
 		ave_epot.resize(nblock);
 		ave_ekin.resize(nblock);
 		ave_etot.resize(nblock);
 		ave_temp.resize(nblock);
 		ave_pres.resize(nblock);
+		ave_gdir.resize(nblock*nbins);
 	}
 
   cout << "The program integrates Newton equations with the Verlet method " << endl;
@@ -270,10 +256,12 @@ double Force(int ip, int idir){ //Compute forces as -Grad_ip V(r)
 }
 
 void Measure(){ //Properties measurement
-  int bin;
   double v, p, t, vij, pij;
   double dx, dy, dz, dr;
-  ofstream Epot, Ekin, Etot, Temp, Pres;
+	double min, max, deltaV;
+
+	//reset the hystogram of g(r)
+	for (int k=0; k<nbins; ++k) gdir[k]=0.0;
 
   v = 0.0; //reset observables
   t = 0.0;
@@ -290,6 +278,14 @@ void Measure(){ //Properties measurement
 			dr = dx*dx + dy*dy + dz*dz;
 			dr = sqrt(dr);
 
+			//update of the histogram of g(r)
+			for (int k=0; k<nbins; ++k){
+					min = k*dl;
+					max =(k+1)*dl;
+					
+					if( dr>min && dr<max )	gdir[k] += 2;
+			}
+
 			if(dr < rcut){
 				//Potential energy
 				vij = 4.0/pow(dr,12) - 4.0/pow(dr,6);
@@ -301,6 +297,15 @@ void Measure(){ //Properties measurement
 		}          
 	}
 
+	//Normalizzo l'istogramma di g(r)
+	for (int k=0; k<nbins; ++k){
+		min = k*dl;
+		max =(k+1)*dl;
+
+		deltaV = 4/3*M_PI * ( pow(max,3)-pow(min,3) );
+		gdir[k] /= (rho*npart*deltaV);
+	}
+
 	//Kinetic energy
 	for (int i=0; i<npart; ++i) t += 0.5 * (vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i]);
    
@@ -310,6 +315,7 @@ void Measure(){ //Properties measurement
 	stima_etot = (t+v)/(double)npart; //Total energy per particle
 	stima_pres = rho*stima_temp + p/(3*vol);	//Pressure
 
+  ofstream Epot, Ekin, Etot, Temp, Pres;
 	
 	if(instant==true){
 		Epot.open("results/epot.out",ios::app);
@@ -334,14 +340,38 @@ void Measure(){ //Properties measurement
     return;
 }
 
-void Average_values(void){
-	ofstream Epot, Ekin, Etot, Temp, Pres;
+
+void Accumulate(int nmeas){		//accumulo le misure relative ai blocchi
+	ave_epot.at(iblock) += stima_pot;
+	ave_ekin.at(iblock) += stima_kin;
+	ave_temp.at(iblock) += stima_temp;
+	ave_etot.at(iblock) += stima_etot;
+	ave_pres.at(iblock) += stima_pres;
+	for(int k=0; k<nbins; k++)	ave_gdir[iblock*nbins+k] += gdir[k];
+
+	if(nmeas%nvalues==0){		//valori medi su ciascun blocco
+		ave_epot.at(iblock) /= nvalues;
+		ave_ekin.at(iblock) /= nvalues;
+		ave_temp.at(iblock) /= nvalues;
+		ave_etot.at(iblock) /= nvalues;
+		ave_pres.at(iblock) /= nvalues;
+		for(int k=0; k<nbins; k++)	ave_gdir[iblock*nbins+k] /= nvalues;
+		iblock++;
+	}
+}
+
+void Average(void){
+	double r, ag;
+	const int wd = 12;
+	vector<double> g(nbins), gerr(nbins), s(nbins), s2(nbins);
+	ofstream Epot, Ekin, Etot, Temp, Pres, Gdir;
 
 	Epot.open("results/ave_epot.out",ios::app);
 	Ekin.open("results/ave_ekin.out",ios::app);
 	Temp.open("results/ave_temp.out",ios::app);
 	Etot.open("results/ave_etot.out",ios::app);
 	Pres.open("results/ave_pres.out",ios::app);
+	Gdir.open("results/MD_Gave.out",ios::app);
 
 	vector<double> cum_epot(nblock), cum_ekin(nblock), cum_etot(nblock), cum_temp(nblock), cum_pres(nblock);
 	vector<double> err_epot(nblock), err_ekin(nblock), err_etot(nblock), err_temp(nblock), err_pres(nblock);
@@ -367,13 +397,36 @@ void Average_values(void){
 		Pres << i << setprecision(9) << "  " << cum_pres[i] << "  " << err_pres[i] << endl;
 	}
 
+	//calcolo g(r) e l'incertezza utilizzando tutti i blocchi
+	for(int iblock=0; iblock<nblock; iblock++){
+		for(int k=0; k<nbins; k++){
+			ag = ave_gdir[iblock*nbins+k];
+			s[k]  += ag;
+			s2[k] += ag*ag;
+		}
+	}
+	for(int k=0; k<nbins; k++){
+		r = (k+0.5)*dl;
+		g[k] = s[k] / (double)nblock;
+		gerr[k] = Error(s[k], s2[k], nblock);
+
+		Gdir << setw(wd) << r << setw(wd) << g[k] << setw(wd) << gerr[k] << endl;
+	}
+
 	Epot.close();
 	Ekin.close();
 	Temp.close();
 	Etot.close();
 	Pres.close();
+	Gdir.close();
 	return;
 }
+
+double Error(double sum, double sum2, int iblk){
+    if( iblk == 1 ) return 0.0;
+    else return sqrt((sum2/(double)iblk - pow(sum/(double)iblk,2))/(double)(iblk-1));
+}
+
 
 void ConfFinal(void){ //Write final configuration
   ofstream WriteConf;

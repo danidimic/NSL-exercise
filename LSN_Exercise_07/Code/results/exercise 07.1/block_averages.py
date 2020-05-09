@@ -26,13 +26,15 @@ def data_blocking(arr, N, L):
 	
 	average  = s
 	error = math.sqrt( (s2-s**2)/(N-1) )
-	return [average,error]
+	return [average, error]
 
-phase = 'gas'
+phase = 'liquid'
 ene  = np.loadtxt(phase + "_ene.out")
 pres = np.loadtxt(phase + "_pres.out")
 
+aveE = []
 errE = []
+aveP = []
 errP = []
 
 M = 5e5 #valori totali
@@ -56,14 +58,17 @@ for i in range(L.size):
 		print(i)
 
 	db = data_blocking(ene, N, L[i])
+	aveE.append(db[0])
 	errE.append(db[1])
 
 	db = data_blocking(pres, N, L[i])
+	aveP.append(db[0])
 	errP.append(db[1])	
 
-
-E =  np.column_stack((L, errE))
-P =  np.column_stack((L, errP))
+d = np.column_stack((L, aveE))
+E =  np.column_stack((d, errE))
+d = np.column_stack((L, aveP))
+P =  np.column_stack((d, errP))
 
 np.savetxt('DB_ene.out', E, delimiter=" " )
 np.savetxt('DB_pres.out', P, delimiter=" " )

@@ -24,6 +24,11 @@ const int m_part=108;
 double x[m_part],y[m_part],z[m_part],xold[m_part],yold[m_part],zold[m_part];
 double vx[m_part],vy[m_part],vz[m_part];
 
+//gdir istogram
+int nbins = 100;
+double dl;
+vector<double> gdir(nbins);
+
 // thermodynamical state
 int npart;
 double energy,temp,vol,rho,box,rcut;
@@ -34,9 +39,9 @@ double delta;
 bool restart, instant;
 
 //data blocking
-int nblock, nvalues;
-bool data_blocking;
-vector<double> ave_epot(0), ave_ekin(0), ave_etot(0), ave_temp(0), ave_pres(0);
+int nblock, nvalues, iblock;
+bool blocking;
+vector<double> ave_epot(0), ave_ekin(0), ave_etot(0), ave_temp(0), ave_pres(0), ave_gdir(0);
 
 //functions
 void Input(void);
@@ -46,7 +51,9 @@ void ConfXYZ(int);
 void Measure(void);
 double Force(int, int);
 double Pbc(double);
-void Average_values(void);
+double Error(double, double, int);
+void Average(void);
+void Accumulate(int);
 /****************************************************************
 *****************************************************************
     _/    _/  _/_/_/  _/       Numerical Simulation Laboratory

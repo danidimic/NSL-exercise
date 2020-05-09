@@ -340,7 +340,7 @@ void Averages(int iblk){ //Print results for current block
 		walker[k+igofr] /= (rho*npart*deltaV);
 
 		r = (max-min)/2 + min;
-		gdir = walker[k+igofr]/blk_norm;
+		gdir = walker[k+igofr];
 		//Block averages per gdir
 		Gofr << setw(wd) << iblk <<  setw(wd) << r << setw(wd) << gdir << endl;
 
