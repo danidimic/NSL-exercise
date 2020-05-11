@@ -1,0 +1,23 @@
+1.2
+108
+0.05
+5.0
+0.0005
+20000
+1000
+1
+1
+20
+0
+
+	ReadInput >> temp;
+	ReadInput >> npart;
+	ReadInput >> rho;
+	ReadInput >> rcut;
+	ReadInput >> delta;
+	ReadInput >> nstep;
+	ReadInput >> iprint;
+	ReadInput >> restart;
+	ReadInput >> data_blocking;				0=false, 1=true
+	ReadInput >> nblock;
+	ReadInput >> instant;					0=false, 1=true

@@ -28,7 +28,7 @@ def data_blocking(arr, N, L):
 	error = math.sqrt( (s2-s**2)/(N-1) )
 	return [average, error]
 
-phase = 'liquid'
+phase = 'solid'
 ene  = np.loadtxt(phase + "_ene.out")
 pres = np.loadtxt(phase + "_pres.out")
 
@@ -38,17 +38,15 @@ aveP = []
 errP = []
 
 M = 5e5 #valori totali
+L = np.arange(start=10, stop=5000, step=25)
 
-L1 = np.arange(start=10, stop=100, step=10)
-L2 = np.arange(start=100, stop=1000, step=100)
-L3 = np.arange(start=1000, stop=5000, step=200)
+#L1 = np.arange(start=10, stop=100, step=10)
+#L2 = np.arange(start=100, stop=1000, step=20)
+#L3 = np.arange(start=1000, stop=5000, step=200)
 
-L12 = np.concatenate( (L1,L2) )
-L = np.concatenate( (L12,L3) )
-L = np.append( L, 5000 )
-
-#print(L.size)
-#print(L)
+#L12 = np.concatenate( (L1,L2) )
+#L = np.concatenate( (L12,L3) )
+#L = np.append( L, 5000 )
 
 for i in range(L.size):
 	print("ciclo :", i)

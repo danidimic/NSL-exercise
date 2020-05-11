@@ -75,6 +75,10 @@ void Input(void){ //Prepare all stuff for the simulation
   ReadInput >> nstep;
   ReadInput >> iprint;
 
+  //Tail corrections for potential energy and pressure
+  vtail = (8.0*pi*rho)/(9.0*pow(rcut,9)) - (8.0*pi*rho)/(3.0*pow(rcut,3));
+  ptail = (32.0*pi*rho)/(9.0*pow(rcut,9)) - (16.0*pi*rho)/(3.0*pow(rcut,3));
+
 	ReadInput >> restart;
 	//ReadConf.open("old.0");
 	//restart = ReadConf.is_open();
@@ -309,11 +313,15 @@ void Measure(){ //Properties measurement
 	//Kinetic energy
 	for (int i=0; i<npart; ++i) t += 0.5 * (vx[i]*vx[i] + vy[i]*vy[i] + vz[i]*vz[i]);
    
-	stima_pot = v/(double)npart; //Potential energy per particle
+//	stima_pot = v/(double)npart; //Potential energy per particle
 	stima_kin = t/(double)npart; //Kinetic energy per particle
 	stima_temp = (2.0 / 3.0) * t/(double)npart; //Temperature
 	stima_etot = (t+v)/(double)npart; //Total energy per particle
-	stima_pres = rho*stima_temp + p/(3*vol);	//Pressure
+//	stima_pres = rho*stima_temp + p/(3*vol);	//Pressure
+
+	//Tail corrections
+	stima_pot = v/(double)npart + vtail; //Potential energy per particle
+	stima_pres = rho*stima_temp + (p + ptail)/(3*vol);	//Pressure
 
   ofstream Epot, Ekin, Etot, Temp, Pres;
 	

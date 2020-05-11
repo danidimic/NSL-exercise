@@ -11,9 +11,5 @@ pres = np.loadtxt(phase + '_pres.out')
 Aene = stat.acf(ene, fft=True, nlags=n-1)
 Apres = stat.acf(pres, fft=True, nlags=n-1)
 
-lag = np.arange(0, M, step=M/n)
-E = np.column_stack((lag, Aene))
-P = np.column_stack((lag, Apres))
-
-np.savetxt('Autocorr_ene.out', E, delimiter=" " )
-np.savetxt('Autocorr_pres.out', P, delimiter=" " )
+np.savetxt('Autocorr_ene.out', Aene)
+np.savetxt('Autocorr_pres.out', Apres)

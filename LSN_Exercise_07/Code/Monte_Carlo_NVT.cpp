@@ -30,10 +30,10 @@ int main(){
 			Measure();
 			//Print(istep);				//Print istant values
 			Accumulate(); 				//Update block averages
-			if(istep%10 == 0){
-				//ConfXYZ(nconf);		//Write actual configuration in XYZ format //Commented to avoid "filesystem full"! 
+			//if(istep%10 == 0){
+				ConfXYZ(nconf);		//Write actual configuration in XYZ format //Commented to avoid "filesystem full"! 
 				nconf += 1;
-			}
+			//}
 		}
 		Averages(iblk);   //Print results for current block
 	}

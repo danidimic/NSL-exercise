@@ -8,6 +8,7 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 *****************************************************************
 *****************************************************************/
 #include <vector>
+#include <cmath>
 using namespace std;
 
 //parameters, observables
@@ -32,10 +33,11 @@ vector<double> gdir(nbins);
 // thermodynamical state
 int npart;
 double energy,temp,vol,rho,box,rcut;
+double vtail, ptail;
 
 // simulation
 int nstep, iprint, seed;
-double delta;
+double delta, pi = M_PI;
 bool restart, instant;
 
 //data blocking
