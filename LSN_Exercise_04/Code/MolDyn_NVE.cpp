@@ -317,7 +317,7 @@ void Measure(){ //Properties measurement
 	stima_kin = t/(double)npart; //Kinetic energy per particle
 	stima_temp = (2.0 / 3.0) * t/(double)npart; //Temperature
 	stima_etot = (t+v)/(double)npart; //Total energy per particle
-	stima_pres = rho*stima_temp + p/(3*vol);	//Pressure
+	stima_pres = rho*temp + p/(3*vol);	//Pressure
 
   ofstream Epot, Ekin, Etot, Temp, Pres;
 	
@@ -361,8 +361,8 @@ void Accumulate(int nmeas){		//accumulo le misure relative ai blocchi
 		ave_pres.at(iblock) /= nvalues;
 
 		//Tail corrections
-		ave_epot.at(iblock) += vtail;					 //Potential energy per particle
-		ave_pres.at(iblock) += ptail/(3*vol);	//Pressure
+		ave_epot.at(iblock) += vtail;					 		//Potential energy per particle
+		ave_pres.at(iblock) += (npart*ptail)/vol;	//Pressure
 
 		for(int k=0; k<nbins; k++)	ave_gdir[iblock*nbins+k] /= nvalues;
 		iblock++;
