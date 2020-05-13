@@ -67,7 +67,7 @@ void Input(void){ //Prepare all stuff for the simulation
   vol = (double)npart/rho;
   cout << "Volume of the simulation box = " << vol << endl;
   box = pow(vol,1.0/3.0);
-  cout << "Edge of the simulation box = " << box << endl;
+  cout << "Edge of the simulation box = " << box << endl << endl;
 	dl = 0.5*box/nbins;
 
   ReadInput >> rcut;
@@ -77,7 +77,9 @@ void Input(void){ //Prepare all stuff for the simulation
 
   //Tail corrections for potential energy and pressure
   vtail = (8.0*pi*rho)/(9.0*pow(rcut,9)) - (8.0*pi*rho)/(3.0*pow(rcut,3));
+	cout << "Tail correction for potential energy = " << vtail << endl;
   ptail = (32.0*pi*rho)/(9.0*pow(rcut,9)) - (16.0*pi*rho)/(3.0*pow(rcut,3));
+	cout << "Tail correction for pressure = " << ptail << endl << endl;
 
 	ReadInput >> restart;
 	//ReadConf.open("old.0");
