@@ -28,7 +28,7 @@ def data_blocking(arr, N, L):
 	error = math.sqrt( (s2-s**2)/(N-1) )
 	return [average, error]
 
-phase = 'solid'
+phase = 'gas'
 ene  = np.loadtxt(phase + "_ene.out")
 pres = np.loadtxt(phase + "_pres.out")
 

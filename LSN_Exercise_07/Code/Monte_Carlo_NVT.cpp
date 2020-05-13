@@ -38,7 +38,7 @@ int main(){
 		Averages(iblk);   //Print results for current block
 	}
 	ConfFinal();			 //Write final configuration
-    cout << "Acceptance rate " << accepted/attempted << endl << endl;
+	cout << "Acceptance rate " << accepted/attempted << endl << endl;
 
 	return 0;
 }
