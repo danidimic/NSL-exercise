@@ -1,0 +1,11 @@
+2.55
+0.807035
+0.622111
+
+	ReadInput >> delta
+	ReadInput >> mu
+	ReadInput >> sigma
+
+mu =  0.807035
+sigma =  0.622111
+
