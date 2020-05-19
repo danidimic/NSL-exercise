@@ -14,7 +14,7 @@ int main (int argc, char *argv[]){
 	Input();
 
 	int naccept = 0;
-	double current_pos = 0, proposed_pos = 0, alfa, xmax = 0, xmin = 0, c;
+	double current_pos = 0, proposed_pos = 0, alfa, c, xmax=3, xmin=-3;
 	vec x(nstep), PsiT(nbins, fill::zeros);
 	vector<double> H(nblock);
 		
@@ -31,16 +31,16 @@ int main (int argc, char *argv[]){
 		}
 		H[j] = MCintegral(x);					//calcolo l'integrale MC importance sampling
 
-		xmin += x.min();
-		xmax += x.max();
+		//Definisco gli estremi dell'istogramma
+		x.resize(nstep+2);
+		x[nstep-2] = xmax;
+		x[nstep-1] = xmin;
 		PsiT += gethisto(x, nbins);		//istogramma delle posizioni
 	}
 	data_blocking(H, "results/Ene.out");
 	cout<<"Accettazione complessiva Metropolis: "<<naccept/((double)nblock*nstep)<<endl;
 
 	//Ottengo l'istogramma di PsiT calcolato tramite data blocking
-	xmin /= (double)nblock;
-	xmax /= (double)nblock;
 	PsiT /= (double)nblock;
 	ofstream Out("results/Psi.out");
 	for(int i=0; i<(int)PsiT.size(); i++){
