@@ -7,6 +7,7 @@ using namespace arma;
 #define hbar 1
 
 Random rnd;
+//int nblock = 100, nstep = 5E5, nbins = 150;
 int nblock = 100, nstep = 5E5, nbins = 150;
 double delta, mu, sigma; 
 

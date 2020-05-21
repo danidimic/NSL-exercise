@@ -50,12 +50,12 @@ int main (int argc, char *argv[]){
 	Out.close();
 
 /*
+	//Valori da stampare per simulated annealing
 	double ene = cumulative_average(H).back();
-
-	ofstream Out("results/minimize.out", ios::app);
-	Out<<"   "<<mu<<"   "<<sigma<<"   "<<ene<<endl;
+	ofstream Out("results/minimize.out");
+	Out<<ene<<endl;
 	Out.close();
-*/	
+*/
 
 	rnd.SaveSeed();
 	return 0;
