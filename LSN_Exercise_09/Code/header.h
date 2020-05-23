@@ -27,6 +27,7 @@ bool CheckPath(rowvec);
 double CostFunction(rowvec, int n);
 int Pbc(int);
 int Select(void);
+mat GetSon();
 rowvec GeneratePath();
 rowvec Shift(rowvec, int m);
 rowvec PairPermutation(rowvec);

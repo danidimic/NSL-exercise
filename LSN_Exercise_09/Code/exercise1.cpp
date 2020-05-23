@@ -9,9 +9,9 @@
 using namespace std;
 
 int main (int argc, char *argv[]){
-	
-	unsigned int ibest;
-	double pc, L;
+
+	int ibest;
+	double pc, L, aveL;
 	ofstream Cities, Path, Lenght;
 
 	Input();
@@ -21,16 +21,19 @@ int main (int argc, char *argv[]){
 	lenght.push_back(L);
 
 	for(int i=0; i<nstep; i++){
-		pc = rnd.Rannyu();		
+		
+		if(i%100 == 0) cout<<"Numero di passi = "<<i<<endl;
+
+		pc = rnd.Rannyu();
 		if ( pc>0.5 ){
 			Crossover();
+
 			ibest = fitness.index_min();
 			L = CostFunction(population.row(ibest), power);
 			lenght.push_back(L);
 		}
 	}
-
-
+	
 	Cities.open("results/cities.out");
 	for(int i=0; i<ncities; i++)
 		Cities<<cities.row(i)<<endl;
@@ -65,15 +68,14 @@ void Input(void){
 	INDECES = linspace<vec>(1, ncities-1, ncities-1);
 
 	ReadInput >> npop;
-	cout<<"Popolazione di "<<npop<<" individui"<<endl;
+	cout<<"Individui nella popolazione = "<<npop<<endl;
 	ReadInput >> nstep;
-	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl;
+	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl<<endl;
 	ReadInput >> power;
 
 	//Creo una popolazione di npop individui
 	rowvec path(ncities);
 	for(int i=0; i<npop; i++){
-
 		for(;;){		//Genero la popolazione
 			path = GeneratePath();
 			if( CheckPath(path)==1 ) break;
@@ -87,9 +89,7 @@ void Input(void){
 
 //Inizializzo casualmente un insieme di città
 void CreateCities(){
-
 	rowvec city(2);
-
 	//Città lungo la circonferenza
 	if(ndim==1){
 		double theta, r = side;
@@ -156,6 +156,30 @@ int Select(void){
 //Crossover per nuovi individui
 void Crossover(){
 
+	mat s = GetSon();
+	rowvec son1 = s.row(0);
+	rowvec son2 = s.row(1);
+
+	//Modifico la popolazione
+	int imin;
+	if( CheckPath(son1)==1 && CheckPath(son2)==1 ){
+		//Eventuali mutazioni
+		Mutation(son1);
+		Mutation(son2);
+		//Aggiungo il primo figlio
+		imin = fitness.index_min();
+		population.row(imin) = son1;
+		FitnessFunc(power);
+		//Aggiungo il secondo figlio
+		imin = fitness.index_min();
+		population.row(imin) = son2;
+		FitnessFunc(power);
+	}
+	else	Crossover();
+}
+
+//Genero due figli dalla popolazione
+mat GetSon(){
 	int ifather, imother;
 	rowvec father, mother;
 
@@ -167,51 +191,45 @@ void Crossover(){
 	}
 	father = population.row(ifather);
 	mother = population.row(imother);
-	
-	int crosspoint;
-	for(;;){
-		crosspoint = rnd.Gauss( (int) ncities/2, (double) ncities/4 );
-		if(crosspoint>1 && crosspoint<ncities-1) break;
-	}
+
 	//Stacco i pezzi fino al crosspoint
-	rowvec son1(ncities), son2(ncities);
+	int crosspoint = rnd.Rannyu(1, ncities-1), l = ncities-crosspoint;
+	rowvec son1(ncities, fill::zeros), son2(ncities, fill::zeros);
 	for(int i=0; i<crosspoint; i++){
 		son1[i] = father[i];
 		son2[i] = mother[i];
 	}
-	//Ottengo le parti restanti nell'ordine
-	int i1 = crosspoint, i2 = crosspoint, f, m;
-	for(int i=0; i<ncities; i++){
-		f = father[i];
-		m = mother[i];
+	rowvec restF(l), restM(l);
+	for(int i=0; i<l; i++){
+		restF[i] = father[i+crosspoint];
+		restM[i] = mother[i+crosspoint];
+	}
 
-		if( count(son1.begin(), son1.end(), m)==0 ){
-			son1[i1] = m;
-			i1++;
+	int f, m;
+	rowvec restSon1(l, fill::zeros), restSon2(l, fill::zeros);
+	//Completo figlio 1
+	int i=0;
+	for(int j=0; j<ncities; j++){
+		m = mother[j];
+		if( count(restF.begin(), restF.end(), m)==1 ){
+			son1[crosspoint+i] = m;
+			i++;
 		}
-		if( count(son2.begin(), son2.end(), f)==0 ){
-			son2[i2] = f;
-			i2++;
+	}
+	//Completo figlio 2
+	i = 0;
+	for(int j=0; j<ncities; j++){
+		f = father[j];
+		if( count(restM.begin(), restM.end(), f)==1 ){
+			son2[crosspoint+i] = f;
+			i++;
 		}
 	}
 
-	//Modifico la popolazione
-	int imin;
-	if( CheckPath(son1)==1 && CheckPath(son2)==1 ){
-		//Eventuali mutazioni
-		Mutation(son1);
-		Mutation(son2);
-
-		//Aggiungo il primo figlio
-		imin = fitness.index_min();
-		population.row(imin) = son1;
-		FitnessFunc(power);
-		//Aggiungo il secondo figlio
-		imin = fitness.index_min();
-		population.row(imin) = son2;
-		FitnessFunc(power);
-	}
-	else	Crossover();
+	mat sons;
+	sons.insert_rows(0, son1);
+	sons.insert_rows(1, son2);
+	return sons;
 }
 
 //Inserisco eventuali mutazioni 
@@ -305,7 +323,7 @@ rowvec Reverse(rowvec path, int start, int end){
 		path[i+start] = newpath[i];
 
 	return path;
-} 
+}
 
 //Periodic boundary condition
 int Pbc(int index){
@@ -315,7 +333,5 @@ int Pbc(int index){
 	else
 		return index;
 }
-
-
 
 
