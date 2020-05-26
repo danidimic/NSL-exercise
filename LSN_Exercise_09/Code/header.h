@@ -7,32 +7,29 @@ using namespace arma;
 Random rnd;
 
 //Genetic algorithm
-int power;
 rowvec bestpath;
-vec INDECES, fitness;
-mat cities, population;
-
-double side;
-int ncities, ndim, npop, nstep;
+vec INDECES, fitness, bestpop;
+mat cities, population, newgeneration;
+double pcross, pmpp, pmsh, pmrev, side;
+int power, ncities, ndim, npop, nstep, elsize;
 
 vector<double> lenght, avelenght;
 
 //Funzioni
 void Input(void);
-void FitnessFunc(int p);
-void Crossover(void);
+void FitnessFunc(void);
+void Generation(void);
 void CreateCities(void);
-void Mutation(rowvec);
 bool CheckPath(rowvec);
-double CostFunction(rowvec, int n);
+double CostFunction(rowvec);
 int Pbc(int);
 int Select(void);
-mat GetSon();
+mat Crossover();
 rowvec GeneratePath();
-rowvec Shift(rowvec, int m);
+rowvec Mutation(rowvec);
+rowvec Shift(rowvec);
+rowvec Reverse(rowvec);
 rowvec PairPermutation(rowvec);
-rowvec PairPermutation(rowvec, int, int);
-rowvec Reverse(rowvec, int, int);
 
 
 

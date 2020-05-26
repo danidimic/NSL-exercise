@@ -1,9 +1,13 @@
 32
-2
-50
-10000
+1
+10
+500
 1000
 1
+0.6
+0.03
+0.05
+0.03
 
 
 ReadInput >> ncities
@@ -12,4 +16,9 @@ ReadInput >> side
 ReadInput >> npop
 ReadInput >> nstep
 ReadInput >> power
+ReadInput >> pcross
+ReadInput >> pmpp				PairPermutation
+ReadInput >> pmsh				Shift
+ReadInput >> pmrev			Reverse
+
 
