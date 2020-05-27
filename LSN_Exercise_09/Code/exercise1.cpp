@@ -19,21 +19,21 @@ int main(int argc, char *argv[]){
 
 	for(int i=0; i<nstep; i++){
 		
+		Generation();		//Nuova generazione di percorsi
+
 		if(i%10==0){
 			cout<<"Generazione "<<i<<endl;
 			ibest = fitness.index_max();
 			cout<<"L min = "<<CostFunction( population.row(ibest) )<<endl<<endl;
+
+			//Lunghezza del percordo migliore
+			ibest = fitness.index_max();
+			L = CostFunction(population.row(ibest));
+			lenght.push_back(L);
+			//Lunghezza mediata sulla popolazione migliore
+			aveL = BestHalf();
+			avelenght.push_back(aveL);
 		}
-
-		Generation();		//Nuova generazione di percorsi
-
-		//Lunghezza del percordo migliore
-		ibest = fitness.index_max();
-		L = CostFunction(population.row(ibest));
-		lenght.push_back(L);
-		//Lunghezza mediata sulla popolazione migliore
-		aveL = BestHalf();
-		avelenght.push_back(aveL);
 	}
 
 	Path.open("results/best_path.out");
@@ -78,7 +78,8 @@ void Input(void){
 
 	ReadInput >> npop;
 	cout<<"Individui nella popolazione = "<<npop<<endl;
-	elsize = 0.05*npop;	//dimensioni dell'elite
+	ReadInput >> elite;
+	elsize = elite*npop;	//dimensioni dell'elite
 	cout<<"Dimensioni dell'elite = "<<elsize<<endl;
 	ReadInput >> nstep;
 	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl<<endl;

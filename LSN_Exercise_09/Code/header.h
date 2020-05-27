@@ -10,7 +10,7 @@ Random rnd;
 rowvec bestpath;
 vec INDECES, fitness, bestpop;
 mat cities, population, newgeneration;
-double pcross, pmpp, pmsh, pmrev, side;
+double pcross, pmpp, pmsh, pmrev, elite, side;
 int power = 1, ncities, ndim, npop, nstep, elsize;
 
 vector<double> lenght, avelenght;

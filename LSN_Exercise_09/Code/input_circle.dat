@@ -2,9 +2,10 @@
 1
 10
 500
+0.05
 1000
 0.65
-0.03
+0.1
 0.05
 0.03
 
@@ -13,11 +14,11 @@ ReadInput >> ncities
 ReadInput >> ndim
 ReadInput >> side
 ReadInput >> npop
+ReadInput >> elite
 ReadInput >> nstep
-ReadInput >> power
-ReadInput >> pcross
-ReadInput >> pmpp				PairPermutation
-ReadInput >> pmsh				Shift
-ReadInput >> pmrev			Reverse
+ReadInput >> pcross			Crossover probability
+ReadInput >> pmpp				PairPermutation probability
+ReadInput >> pmsh				Shift probability
+ReadInput >> pmrev			Reverse probability
 
 
