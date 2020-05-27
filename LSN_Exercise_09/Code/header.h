@@ -11,7 +11,7 @@ rowvec bestpath;
 vec INDECES, fitness, bestpop;
 mat cities, population, newgeneration;
 double pcross, pmpp, pmsh, pmrev, side;
-int power, ncities, ndim, npop, nstep, elsize;
+int power = 1, ncities, ndim, npop, nstep, elsize;
 
 vector<double> lenght, avelenght;
 

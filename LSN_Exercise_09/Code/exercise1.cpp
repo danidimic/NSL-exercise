@@ -19,8 +19,8 @@ int main(int argc, char *argv[]){
 
 	for(int i=0; i<nstep; i++){
 		
-		if(i%50==0){
-			cout<<"Iterazione "<<i<<endl;
+		if(i%10==0){
+			cout<<"Generazione "<<i<<endl;
 			ibest = fitness.index_max();
 			cout<<"L min = "<<CostFunction( population.row(ibest) )<<endl<<endl;
 		}
@@ -82,7 +82,6 @@ void Input(void){
 	cout<<"Dimensioni dell'elite = "<<elsize<<endl;
 	ReadInput >> nstep;
 	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl<<endl;
-	ReadInput >> power;
 
 	//Probabilità crossover e mutazioni
 	ReadInput >> pcross;
