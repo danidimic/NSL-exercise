@@ -7,31 +7,29 @@ using namespace arma;
 Random rnd;
 
 //Genetic algorithm
-rowvec bestpath;
-vec INDECES, fitness, bestpop;
-mat cities, population, newgeneration;
-double pcross, pmpp, pmsh, pmrev, side;
-int power, ncities, ndim, npop, nstep, elsize;
+mat cities;
+vec INDECES;
+rowvec currentpath, proposedpath;
+double pmpp, pmsh, pmrev, side;
+int power = 1, ncities, ndim, nstep;
 
-vector<double> lenght, avelenght;
+//Simulated Annealing
+vec temp;
+double beta, Tmin = 0.01, Tmax = 5.; 
+
+vector<double> lenght;
 
 //Funzioni
 void Input(void);
-void FitnessFunc(void);
-void Generation(void);
 void CreateCities(void);
+void UpdateProbabilities(void);
 bool CheckPath(rowvec);
 int Pbc(int);
-int Select(void);
 double CostFunction(rowvec);
-double BestHalf();
-mat Crossover();
+double min(double, double);
 rowvec GeneratePath();
 rowvec Mutation(rowvec);
 rowvec Shift(rowvec);
 rowvec Reverse(rowvec);
 rowvec PairPermutation(rowvec);
-
-
-
 

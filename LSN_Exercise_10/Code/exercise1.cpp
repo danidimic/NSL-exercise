@@ -11,51 +11,46 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 
-	int ibest;
-	double L, aveL;
-	ofstream Cities, Path, Lenght;
+	int naccept = 0, ntot = 0;
+	double delta, alpha, r, L, bestL;
 
 	Input();
+	
+	bestL = CostFunction(currentpath);
 
-	for(int i=0; i<nstep; i++){
-		
-		if(i%50==0){
-			cout<<"Iterazione "<<i<<endl;
-			ibest = fitness.index_max();
-			cout<<"L min = "<<CostFunction( population.row(ibest) )<<endl<<endl;
+	for(int i=0; i<(int)temp.size(); i++){
+		beta = 1. / temp[i]; 		//temperatura fittizia
+		cout<<endl<<"Temperatura fittizia T = "<<temp[i]<<endl<<endl;
+
+		for(int j=0; j<nstep; j++){
+
+			if(j%1000==0){
+				cout<<"Generazione = "<<ntot<<endl;
+				cout<<"Lunghezza minima = "<<bestL<<endl;
+			}
+
+			proposedpath = Mutation(currentpath);
+
+			r = rnd.Rannyu();
+			delta = CostFunction(proposedpath) - CostFunction(currentpath);
+			alpha = min( 1, exp(-beta*delta) );
+
+			if(r<alpha){
+				currentpath = proposedpath;
+				naccept++;
+
+				L = CostFunction(currentpath);
+				if(L < bestL) bestL = L;
+				lenght.push_back(bestL);
+			}
+			ntot++;
 		}
-
-		Generation();		//Nuova generazione di percorsi
-
-		//Lunghezza del percordo migliore
-		ibest = fitness.index_max();
-		L = CostFunction(population.row(ibest));
-		lenght.push_back(L);
-		//Lunghezza mediata sulla popolazione migliore
-		aveL = BestHalf();
-		avelenght.push_back(aveL);
+		UpdateProbabilities();
 	}
 
-	Path.open("results/best_path.out");
-	ibest = fitness.index_max();
-	Path<<population.row(ibest)<<endl;
-	Path.close();
-
-	Cities.open("results/cities.out");
-	for(int i=0; i<ncities; i++)
-		Cities<<cities.row(i)<<endl;
-	Cities.close();
-
-	Lenght.open("results/lenght.out");
-	for(int i=0; i<(int)lenght.size(); i++)
-		Lenght<<i<<"  "<<lenght[i]<<endl;
-	Lenght.close();
-
-	Lenght.open("results/avelenght.out");
-	for(int i=0; i<(int)avelenght.size(); i++)
-		Lenght<<i<<"  "<<avelenght[i]<<endl;
-	Lenght.close();
-
+	cout<<"Lunghezza percorso = "<<CostFunction(currentpath)<<endl;
+	cout<<endl<<"Accettazione del metropolis = "<<(double) naccept/ntot<<endl;
+	
 	rnd.SaveSeed();
 	return 0;
 
@@ -67,7 +62,7 @@ void Input(void){
 	rnd = RandomGenerator();
 	ifstream ReadInput("input.dat");
 
-	cout << "Algoritmo genetico per la soluzione del 'Travelling Salesman Problem'"<<endl<<endl;
+	cout << "Simulated Annealing per la soluzione del 'Travelling Salesman Problem'"<<endl<<endl;
 	ReadInput >> ncities;
 	cout<<"Numero di città = "<<ncities<<endl;
 
@@ -76,35 +71,19 @@ void Input(void){
 	CreateCities();		//inizializzo l'insieme di città
 	INDECES = linspace<vec>(1, ncities-1, ncities-1);
 
-	ReadInput >> npop;
-	cout<<"Individui nella popolazione = "<<npop<<endl;
-	elsize = 0.05*npop;	//dimensioni dell'elite
-	cout<<"Dimensioni dell'elite = "<<elsize<<endl;
 	ReadInput >> nstep;
-	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl<<endl;
-	ReadInput >> power;
+	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl;
+	temp = linspace<vec>(Tmax, Tmin, 50);
+	cout<<"Temperatura fittizia da "<<Tmax<<" a "<<Tmin<<endl<<endl;
 
-	//Probabilità crossover e mutazioni
-	ReadInput >> pcross;
+	//Probabilità mutazioni
 	ReadInput >> pmpp;
 	ReadInput >> pmsh;
 	ReadInput >> pmrev;
 
 	ReadInput.close();
 
-	//Creo una popolazione di npop individui
-	rowvec path(ncities);
-	for(int i=0; i<npop; i++){
-		for(;;){		//Genero la popolazione
-			path = GeneratePath();
-			if( CheckPath(path)==1 ) break;
-		}
-		population.insert_rows(i, path);
-	}
-	//Calcolo la funzione fitness
-	fitness.resize(npop);
-	FitnessFunc();
-	bestpop.resize((int)npop/2);
+	currentpath = GeneratePath();
 }
 
 //Inizializzo casualmente un insieme di città
@@ -172,126 +151,6 @@ double CostFunction(rowvec path){
 	return s;
 }
 
-//Calcolo la funzione Fitness
-void FitnessFunc(){
-	rowvec individual(ncities);
-	for(int i=0; i<npop; i++){
-		individual = population.row(i);
-		fitness[i] = 1. / CostFunction(individual);
-	}
-	//fitness /= fitness.max();
-	//fitness  = 1 - fitness;
-	//fitness = normalise(fitness);
-}
-
-//Seleziona un individuo
-int Select(void){
-	int j;
-	double F, alpha, isum = 0;
-	vec fit = fitness;
-
-	F = sum(fitness);
-	alpha = rnd.Rannyu(0, F);
-	do{
-		j = fit.index_max();
-		isum += fitness[j];
-		fit[j] = 0;
-	}while(isum<alpha && j<npop-1);
-	return j;
-}
-
-//Ricavo l'elite della popolazione
-void Elite(){
-	int ibest;
-	vec copyfit = fitness;
-	newgeneration.resize(0,0);
-
-	for(int i=0; i<elsize; i++){
-		ibest = copyfit.index_max();
-		newgeneration.insert_rows(i, population.row(ibest));
-		copyfit[ibest] = 0;
-	}
-}
-
-//Genero una nuova popolazione
-void Generation(){
-	double pc;
-	mat sons;
-	rowvec son1, son2;
-
-	Elite();
-
-	for(int j=elsize; j<npop; j+=2){	//Creo una nuova generazione
-
-		pc = rnd.Rannyu();
-		if( pc<pcross ){
-			sons = Crossover();
-			son1 = sons.row(0);
-			son2 = sons.row(1);
-			//Inserisco eventuali mutazioni
-			son1 = Mutation(son1);
-			son2 = Mutation(son2);
-		}else{
-			son1 = population.row( Select() );
-			son2 = population.row( Select() );
-		}
-
-		newgeneration.insert_rows(j, son1);
-		newgeneration.insert_rows(j+1, son2);
-	}
-	population.resize(0,0);
-	population = newgeneration;
-	FitnessFunc();
-	//cout<<"qui ci sono"<<endl;
-}
-
-//Genero due figli dalla popolazione
-mat Crossover(){
-	rowvec father, mother;
-	int ifather = Select(), imother = Select();
-	father = population.row(ifather);
-	mother = population.row(imother);
-
-	//Stacco i pezzi fino al crosspoint
-	int crosspoint = rnd.Rannyu(1, ncities-1), l = ncities-crosspoint;
-	rowvec son1(ncities, fill::zeros), son2(ncities, fill::zeros);
-	for(int i=0; i<crosspoint; i++){
-		son1[i] = father[i];
-		son2[i] = mother[i];
-	}
-	rowvec restF(l), restM(l);
-	for(int i=0; i<l; i++){
-		restF[i] = father[i+crosspoint];
-		restM[i] = mother[i+crosspoint];
-	}
-
-	int f, m;
-	rowvec restSon1(l, fill::zeros), restSon2(l, fill::zeros);
-	//Completo figlio 1
-	int i=0;
-	for(int j=0; j<ncities; j++){
-		m = mother[j];
-		if( count(restF.begin(), restF.end(), m)==1 ){
-			son1[crosspoint+i] = m;
-			i++;
-		}
-	}
-	//Completo figlio 2
-	i = 0;
-	for(int j=0; j<ncities; j++){
-		f = father[j];
-		if( count(restM.begin(), restM.end(), f)==1 ){
-			son2[crosspoint+i] = f;
-			i++;
-		}
-	}
-
-	mat sons;
-	sons.insert_rows(0, son1);
-	sons.insert_rows(1, son2);
-	return sons;
-}
-
 //Inserisco eventuali mutazioni 
 rowvec Mutation(rowvec individual){
 	double pm = rnd.Rannyu();
@@ -343,18 +202,6 @@ rowvec Reverse(rowvec path){
 	return path;
 }
 
-//Lunghezza media della metà migliore della popolazione
-double BestHalf(){
-	int ibest;
-	vec copyfit = fitness;
-	for(int j=0; j<(int)npop/2; j++){
-		ibest = copyfit.index_max();
-		bestpop[j] = CostFunction(population.row(ibest));
-		copyfit[ibest] = 0;
-	}
-	return mean(bestpop);
-}
-
 //Periodic boundary condition
 int Pbc(int index){
 	
@@ -362,4 +209,20 @@ int Pbc(int index){
 		return index-ncities;
 	else
 		return index;
+}
+
+//Aggiorna probabilità di mutazione
+void UpdateProbabilities(void){
+	pmpp *= 0.9;
+ 	pmsh *= 0.9;
+	pmrev *= 0.9;
+}
+
+
+//Minimo tra due valori
+double min(double a, double b){
+	double Min;
+	if(a<b) Min = a;
+	else	Min = b;
+	return Min;
 }

@@ -179,9 +179,6 @@ void FitnessFunc(){
 		individual = population.row(i);
 		fitness[i] = 1. / CostFunction(individual);
 	}
-	//fitness /= fitness.max();
-	//fitness  = 1 - fitness;
-	//fitness = normalise(fitness);
 }
 
 //Seleziona un individuo
