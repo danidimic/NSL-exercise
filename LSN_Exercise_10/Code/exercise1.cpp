@@ -11,11 +11,14 @@ using namespace std;
 
 int main(int argc, char *argv[]){
 
+	rowvec bestpath;
 	int naccept = 0, ntot = 0;
 	double delta, alpha, r, L, bestL;
+	ofstream Cities, Path, Lenght, Prob;
 
 	Input();
 	
+	bestpath = currentpath;
 	bestL = CostFunction(currentpath);
 
 	for(int i=0; i<(int)temp.size(); i++){
@@ -23,11 +26,6 @@ int main(int argc, char *argv[]){
 		cout<<endl<<"Temperatura fittizia T = "<<temp[i]<<endl<<endl;
 
 		for(int j=0; j<nstep; j++){
-
-			if(j%1000==0){
-				cout<<"Generazione = "<<ntot<<endl;
-				cout<<"Lunghezza minima = "<<bestL<<endl;
-			}
 
 			proposedpath = Mutation(currentpath);
 
@@ -40,17 +38,46 @@ int main(int argc, char *argv[]){
 				naccept++;
 
 				L = CostFunction(currentpath);
-				if(L < bestL) bestL = L;
+				if(L < bestL){
+					bestL = L;
+					bestpath = currentpath;
+				}
+			}
+
+			if(j%100000==0){
+				cout<<"Generazione = "<<ntot<<endl;
+				cout<<"Lunghezza minima = "<<bestL<<endl;
+
 				lenght.push_back(bestL);
 			}
+
 			ntot++;
 		}
 		UpdateProbabilities();
 	}
 
-	cout<<"Lunghezza percorso = "<<CostFunction(currentpath)<<endl;
-	cout<<endl<<"Accettazione del metropolis = "<<(double) naccept/ntot<<endl;
+	cout<<endl<<"Generazioni totali = "<<ntot<<endl;
+	cout<<"Accettazione del metropolis = "<<(double) naccept/ntot<<endl;
 	
+	Cities.open("results/cities.out");
+	for(int i=0; i<ncities; i++)
+		Cities<<cities.row(i)<<endl;
+	Cities.close();
+
+	Lenght.open("results/lenght.out");
+	for(int i=0; i<(int)lenght.size(); i++)
+		Lenght<<i<<"  "<<lenght[i]<<endl;
+	Lenght.close();
+
+	Path.open("results/best_path.out");
+	Path<<bestpath<<endl;
+	Path.close();
+
+	Prob.open("results/probabilities.out");
+	for(int i=0; i<(int)temp.size(); i++)
+		Prob<<temp[i]<<"  "<<PMpp[i]<<"  "<<PMsh[i]<<"  "<<PMrev[i]<<"  "<<PMmul[i]<<endl;
+	Prob.close();
+
 	rnd.SaveSeed();
 	return 0;
 
@@ -73,13 +100,14 @@ void Input(void){
 
 	ReadInput >> nstep;
 	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl;
-	temp = linspace<vec>(Tmax, Tmin, 50);
+	temp = linspace<vec>(Tmax, Tmin, 25);
 	cout<<"Temperatura fittizia da "<<Tmax<<" a "<<Tmin<<endl<<endl;
 
 	//Probabilità mutazioni
 	ReadInput >> pmpp;
 	ReadInput >> pmsh;
 	ReadInput >> pmrev;
+	ReadInput >> pmul;
 
 	ReadInput.close();
 
@@ -161,6 +189,8 @@ rowvec Mutation(rowvec individual){
 	
 	else if( pm>pmpp+pmsh and pm<pmpp+pmsh+pmrev) individual = Reverse(individual);
 
+	else if( pm>pmpp+pmsh+pmrev and pm<pmpp+pmsh+pmrev+pmul) individual = MultiPermutation(individual, (int)rnd.Rannyu(2,8) );
+
 	return individual;
 }
 
@@ -182,6 +212,16 @@ rowvec PairPermutation(rowvec path){
 	i2 = (int) rnd.Rannyu(1, ncities-1);
 
 	path.swap_cols(i1, i2); 	//scambio le due città nel percorso
+	return path;
+}
+
+rowvec MultiPermutation(rowvec path, int nperm){
+	int i1, i2;
+	for(int i=0; i<nperm; i++){
+		i1 = (int) rnd.Rannyu(1, ncities-1);
+		i2 = (int) rnd.Rannyu(1, ncities-1);
+		path.swap_cols(i1, i2);
+	}
 	return path;
 }
 
@@ -213,9 +253,16 @@ int Pbc(int index){
 
 //Aggiorna probabilità di mutazione
 void UpdateProbabilities(void){
-	pmpp *= 0.9;
- 	pmsh *= 0.9;
+
+	PMpp.push_back(pmpp);
+	PMsh.push_back(pmsh);
+	PMrev.push_back(pmrev);
+	PMmul.push_back(pmul);
+
+	pmpp *= 0.95;
+ 	pmsh *= 0.95;
 	pmrev *= 0.9;
+	pmul *= 0.8;
 }
 
 

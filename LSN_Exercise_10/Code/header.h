@@ -10,14 +10,14 @@ Random rnd;
 mat cities;
 vec INDECES;
 rowvec currentpath, proposedpath;
-double pmpp, pmsh, pmrev, side;
+double pmpp, pmsh, pmrev, pmul, side;
 int power = 1, ncities, ndim, nstep;
 
 //Simulated Annealing
 vec temp;
 double beta, Tmin = 0.01, Tmax = 5.; 
 
-vector<double> lenght;
+vector<double> lenght, PMpp, PMsh, PMrev, PMmul;
 
 //Funzioni
 void Input(void);
@@ -32,4 +32,5 @@ rowvec Mutation(rowvec);
 rowvec Shift(rowvec);
 rowvec Reverse(rowvec);
 rowvec PairPermutation(rowvec);
+rowvec MultiPermutation(rowvec, int);
 
