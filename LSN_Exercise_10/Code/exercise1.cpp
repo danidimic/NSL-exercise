@@ -3,9 +3,9 @@
 #include <string>
 #include <cmath>
 #include <vector>
-#include "header.h"
 #include "random.h"
 #include "statistics.h"
+#include "simulated_annealing.h"
 using namespace std;
 
 

@@ -26,5 +26,6 @@ public:
 };
 
 Random RandomGenerator();
+Random RandomGenerator(int);
 
 #endif // __Random__

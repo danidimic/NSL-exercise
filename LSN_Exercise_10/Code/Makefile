@@ -4,6 +4,9 @@ CFLAGS = -Wall -O3 --std=c++11
 exercise1.exe : exercise1.o random.o statistics.o
 	$(CC) random.o statistics.o exercise1.o -o exercise1.exe -O2 -larmadillo
 
+exercise2.exe : exercise2.cpp random.o statistics.o
+	mpicxx exercise2.cpp random.o statistics.o -o exercise2.exe -O2 -larmadillo
+
 exercise1.o : exercise1.cpp
 	$(CC) -c exercise1.cpp -o exercise1.o $(CFLAGS)
 

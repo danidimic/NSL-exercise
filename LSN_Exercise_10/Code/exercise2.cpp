@@ -3,58 +3,57 @@
 #include <string>
 #include <cmath>
 #include <vector>
-#include "header.h"
+#include "mpi.h"
 #include "random.h"
 #include "statistics.h"
+#include "genetic_algorithm.h"
 using namespace std;
 
 
 int main(int argc, char *argv[]){
 
-	int ibest;
-	double L, aveL;
-	ofstream Cities, Path, Lenght;
+	double L[4], aveL, l;
+	int ibest, size, rank, n=1;
+	ofstream Lenght;
 
-	Input();
+	MPI_Init(&argc,&argv);
+	MPI_Comm_size(MPI_COMM_WORLD, &size);
+	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+	MPI_Status stat;
+
+	Input(rank);
 
 	for(int i=0; i<nstep; i++){
 
 		Generation();		//Nuova generazione di percorsi
 
 		if(i%10==0){
-			cout<<"Generazione "<<i<<endl;
-			ibest = fitness.index_max();
-			cout<<"L min = "<<CostFunction( population.row(ibest) )<<endl<<endl;
+			MPI_Gather(&aveL, 1, MPI_DOUBLE, L, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-			//Lunghezza del percordo migliore
-			ibest = fitness.index_max();
-			L = CostFunction(population.row(ibest));
-			lenght.push_back(L);
-			//Lunghezza mediata sulla popolazione migliore
-			aveL = BestHalf();
-			avelenght.push_back(aveL);
+			if(rank==0){
+				l = 0;
+				//cout<<L[0]<<"   "<<L[1]<<"   "<<L[2]<<"   "<<L[3]<<endl;
+				for(int j=0; j<size; j++) l += L[j];
+				lenght.push_back( l/(double)size );
+			}
+		}
+
+		if(i%nmigr==0){	//Scambio dei percorsi migliori
+			if(rank==0) cout<<endl<<"Migrazione numero = "<<n<<endl;
+			n++;
+
+			for(int j=0; j<elsize; j++) ExchangeBestPath(stat, rank);
 		}
 	}
 
-	Path.open("results/best_path.out");
-	ibest = fitness.index_max();
-	Path<<population.row(ibest)<<endl;
-	Path.close();
+	if(rank==0){
+		Lenght.open("results/lenght.out", ios::app);
+		for(int i=0; i<(int)lenght.size(); i++)
+			Lenght<<i<<"  "<<lenght[i]<<endl;
+		Lenght.close();
+	}
 
-	Cities.open("results/cities.out");
-	for(int i=0; i<ncities; i++)
-		Cities<<cities.row(i)<<endl;
-	Cities.close();
-
-	Lenght.open("results/lenght.out");
-	for(int i=0; i<(int)lenght.size(); i++)
-		Lenght<<i<<"  "<<lenght[i]<<endl;
-	Lenght.close();
-
-	Lenght.open("results/avelenght.out");
-	for(int i=0; i<(int)avelenght.size(); i++)
-		Lenght<<i<<"  "<<avelenght[i]<<endl;
-	Lenght.close();
+	MPI_Finalize();
 
 	rnd.SaveSeed();
 	return 0;
@@ -63,26 +62,33 @@ int main(int argc, char *argv[]){
 
 
 //Inizializzo le variabili
-void Input(void){
-	rnd = RandomGenerator();
+void Input(int rank){
+	rnd = RandomGenerator(rank);
 	ifstream ReadInput("input.dat");
 
-	cout << "Algoritmo genetico per la soluzione del 'Travelling Salesman Problem'"<<endl<<endl;
 	ReadInput >> ncities;
-	cout<<"Numero di città = "<<ncities<<endl;
-
 	ReadInput >> ndim;
 	ReadInput >> side;
-	CreateCities();		//inizializzo l'insieme di città
 	INDECES = linspace<vec>(1, ncities-1, ncities-1);
 
 	ReadInput >> npop;
-	cout<<"Individui nella popolazione = "<<npop<<endl;
 	ReadInput >> elite;
 	elsize = elite*npop;	//dimensioni dell'elite
-	cout<<"Dimensioni dell'elite = "<<elsize<<endl;
 	ReadInput >> nstep;
-	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl<<endl;
+	ReadInput >> nmigr;
+
+	if(rank == 0){
+		cout << "Algoritmo genetico per la soluzione del 'Travelling Salesman Problem'"<<endl<<endl;
+		cout<<"Numero di città = "<<ncities<<endl;
+	}
+	CreateCities(rank);		//inizializzo l'insieme di città
+	if(rank==0){
+		cout<<"Individui nella popolazione = "<<npop<<endl;
+		cout<<"Dimensioni dell'elite = "<<elsize<<endl;
+		cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl<<endl;
+
+		cout<<"Migrazioni tra individui migliori ogni "<<nmigr<<" generazioni"<<endl<<endl;
+	}
 
 	//Probabilità crossover e mutazioni
 	ReadInput >> pcross;
@@ -108,12 +114,12 @@ void Input(void){
 }
 
 //Inizializzo casualmente un insieme di città
-void CreateCities(){
+void CreateCities(int rank){
 	rowvec city(2);
 	//Città lungo la circonferenza
 	if(ndim==1){
 		double theta, r = side;
-		cout<<"Città disposte lungo una circonferenza di raggio = "<<side<<endl<<endl;
+		if(rank==0) cout<<"Città disposte lungo una circonferenza di raggio = "<<side<<endl<<endl;
 
 		for(int i=0; i<ncities; i++){
 			theta = rnd.Rannyu(0, 2*M_PI);
@@ -124,7 +130,7 @@ void CreateCities(){
 	}
 	//Città all'interno del quadrato
 	if(ndim==2){
-		cout<<"Città disposte all'interno di un quadrato di lato = "<<side<<endl<<endl;
+		if(rank==0) cout<<"Città disposte all'interno di un quadrato di lato = "<<side<<endl<<endl;
 		cities.resize(ncities, 2);
 		cities.imbue( [&]() {return rnd.Rannyu(0, side);} );
 	}
@@ -350,6 +356,71 @@ double BestHalf(){
 		copyfit[ibest] = 0;
 	}
 	return mean(bestpop);
+}
+
+void RandomExchange(void){
+
+	int r = rnd.Rannyu(1, 4);
+	switch(r){
+		case 1:
+		swapindex[0] = 1;
+		swapindex[1] = 0;
+		swapindex[2] = 3;
+		swapindex[3] = 2;
+		break;
+
+		case 2:
+		swapindex[0] = 2;
+		swapindex[1] = 3;
+		swapindex[2] = 0;
+		swapindex[3] = 1;
+		break;
+
+		case 3:
+		swapindex[0] = 3;
+		swapindex[1] = 2;
+		swapindex[2] = 1;
+		swapindex[3] = 0;
+		break;
+	}
+}
+
+void ExchangeBestPath(MPI_Status stat, int rank){
+
+	int r, ibest;
+
+	if(rank == 0) RandomExchange();
+	MPI_Scatter(swapindex, 1, MPI_FLOAT, &r, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
+
+	ibest = fitness.index_max();
+	for(int j=0; j<ncities; j++) change.push_back(population.row(ibest)[j]);
+
+	if(rank==0){
+	MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
+	MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
+	}
+
+	else if(rank==1){
+	MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
+	MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
+	}
+
+	else if(rank==2){
+	MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
+	MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
+	}
+
+	else if(rank==3){
+	MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
+	MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
+	}
+
+	rowvec path(ncities);
+	for(int i=0; i<ncities; i++)
+		path[i] = change[i];
+
+	ibest = fitness.index_max();
+	population.row(ibest) = path;
 }
 
 //Periodic boundary condition
