@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
 
 	double L[4], aveL, l;
 	int ibest, size, rank, n=1;
-	ofstream Lenght, Avelenght;
+	ofstream Lenght, Avelenght, Cities, Path;	
 
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -22,8 +22,10 @@ int main(int argc, char *argv[]){
 	MPI_Status stat;
 
 	Input(rank);
-	Avelenght.open("results/avelenght.out");
+	//cout<<"rank = "<<rank<<endl<<cities<<endl<<endl<<endl;
+
 	Lenght.open("results/lenght_rank" + to_string(rank) + ".out");
+	Avelenght.open("results/avelenght_" + to_string(rank) + ".out");
 
 	for(int i=0; i<nstep; i++){
 
@@ -35,37 +37,39 @@ int main(int argc, char *argv[]){
 			Lenght<<i<<"  "<<CostFunction(population.row(ibest))<<endl;
 			//lunghezza media della migliore metà popolazione di ciascun nodo
 			aveL = BestHalf();
-
-			MPI_Gather(&aveL, 1, MPI_DOUBLE, L, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-			if(rank==0){	//Media sui 4 nodi del programma
-				l = 0;
-				for(int j=0; j<size; j++) l += L[j];
-				Avelenght<<i<<"  "<<l/(double)size<<endl;
-			}
+			Avelenght<<i<<"  "<<aveL<<endl;
 		}
 
 		if(i%nmigr==0){	//Scambio dei percorsi migliori ogni nmigr generazioni
-			if(rank==0) cout<<endl<<"Migrazione numero = "<<n<<endl;
+			if(rank==0) cout<<endl<<"Migrazione numero = "<<n<<" / "<<nstep/nmigr<<endl;
 			n++;
 
 			for(int j=0; j<elsize; j++) ExchangeBestPath(stat, rank);
 		}
 	}
-
 	Lenght.close();
 	Avelenght.close();
 
+	ibest = fitness.index_max();
+	l = CostFunction( population.row(ibest) );
+	MPI_Gather(&l, 1, MPI_DOUBLE, L, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
 	if(rank==0){
+		ibest = 0;
+		l = L[0];
+		for(int i=0; i<4; i++) 
+			if(L[i]<l){
+				l = L[i];
+				ibest = i;
+			}
+	}
+	MPI_Bcast(&ibest, 1, MPI_INTEGER, 0, MPI_COMM_WORLD);
+
+	if(rank==ibest){
 		Path.open("results/best_path.out");
 		ibest = fitness.index_max();
 		Path<<population.row(ibest)<<endl;
 		Path.close();
-
-		Cities.open("results/cities.out");
-		for(int i=0; i<ncities; i++)
-			Cities<<cities.row(i)<<endl;
-		Cities.close();
 	}
 
 	MPI_Finalize();
@@ -96,12 +100,11 @@ void Input(int rank){
 		cout << "Algoritmo genetico per la soluzione del 'Travelling Salesman Problem'"<<endl<<endl;
 		cout<<"Numero di città = "<<ncities<<endl;
 	}
-	CreateCities(rank);		//inizializzo l'insieme di città
+	CreateCities(rank);			//inizializzo l'insieme di città
 	if(rank==0){
 		cout<<"Individui nella popolazione = "<<npop<<endl;
 		cout<<"Dimensioni dell'elite = "<<elsize<<endl;
 		cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl<<endl;
-
 		cout<<"Migrazioni tra individui migliori ogni "<<nmigr<<" generazioni"<<endl;
 	}
 
@@ -110,7 +113,6 @@ void Input(int rank){
 	ReadInput >> pmpp;
 	ReadInput >> pmsh;
 	ReadInput >> pmrev;
-
 	ReadInput.close();
 
 	//Creo una popolazione di npop individui
@@ -131,24 +133,48 @@ void Input(int rank){
 //Inizializzo casualmente un insieme di città
 void CreateCities(int rank){
 	rowvec city(2);
-	//Città lungo la circonferenza
-	if(ndim==1){
-		double theta, r = side;
-		if(rank==0) cout<<"Città disposte lungo una circonferenza di raggio = "<<side<<endl<<endl;
 
+	if(rank == 0){
+		//Città lungo la circonferenza
+		if(ndim==1){
+			double theta, r = side;
+			cout<<"Città disposte lungo una circonferenza di raggio = "<<side<<endl<<endl;
+
+			for(int i=0; i<ncities; i++){
+				theta = rnd.Rannyu(0, 2*M_PI);
+				city[0] = r*cos(theta);
+				city[1] = r*sin(theta);
+				cities.insert_rows(i, city);
+			}
+		}
+		//Città all'interno del quadrato
+		if(ndim==2){
+			cout<<"Città disposte all'interno di un quadrato di lato = "<<side<<endl<<endl;
+			cities.resize(ncities, 2);
+			cities.imbue( [&]() {return rnd.Rannyu(0, side);} );
+		}
+
+		ofstream Cities("results/cities.out");
+		Cities << cities << endl;
+		Cities.close();
+		gocities = 1;		//via libera per i nodi 1,2,3 per leggere le città
+	}
+	MPI_Bcast(&gocities, 1, MPI_INTEGER, 0, MPI_COMM_WORLD);
+	BroadcastCities();
+}
+
+void BroadcastCities(){
+	rowvec city(2);
+	if(gocities == 1) {
+		ifstream Cities("results/cities.out");
 		for(int i=0; i<ncities; i++){
-			theta = rnd.Rannyu(0, 2*M_PI);
-			city[0] = r*cos(theta);
-			city[1] = r*sin(theta);
+			Cities >> city[0];
+			Cities >> city[1];
 			cities.insert_rows(i, city);
 		}
+		Cities.close();
 	}
-	//Città all'interno del quadrato
-	if(ndim==2){
-		if(rank==0) cout<<"Città disposte all'interno di un quadrato di lato = "<<side<<endl<<endl;
-		cities.resize(ncities, 2);
-		cities.imbue( [&]() {return rnd.Rannyu(0, side);} );
-	}
+	else BroadcastCities();
 }
 
 //Genero un possibile percorso
@@ -260,7 +286,6 @@ void Generation(){
 	population.resize(0,0);
 	population = newgeneration;
 	FitnessFunc();
-	//cout<<"qui ci sono"<<endl;
 }
 
 //Genero due figli dalla popolazione
@@ -411,23 +436,23 @@ void ExchangeBestPath(MPI_Status stat, int rank){
 	for(int j=0; j<ncities; j++) change.push_back(population.row(ibest)[j]);
 
 	if(rank==0){
-	MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
-	MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
+		MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
+		MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
 	}
 
 	else if(rank==1){
-	MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
-	MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
+		MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
+		MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
 	}
 
 	else if(rank==2){
-	MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
-	MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
+		MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
+		MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
 	}
 
 	else if(rank==3){
-	MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
-	MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
+		MPI_Send(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD);
+		MPI_Recv(&change.front(), change.size(), MPI_INTEGER, r, 1, MPI_COMM_WORLD, &stat);
 	}
 
 	rowvec path(ncities);

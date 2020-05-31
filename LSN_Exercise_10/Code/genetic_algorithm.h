@@ -14,8 +14,8 @@ double pcross, pmpp, pmsh, pmrev, elite, side;
 int power = 1, ncities, ndim, npop, nstep, elsize;
 
 //Parallel Program
-int swapindex[4], nmigr;
-vector<int> change;
+int swapindex[4], nmigr, gocities = 0;
+vector<int> change, getcities;
 
 //Funzioni
 void Input(int);
@@ -23,6 +23,7 @@ void FitnessFunc(void);
 void Generation(void);
 void RandomExchange(void);
 void CreateCities(int);
+void BroadcastCities(void);
 void ExchangeBestPath(MPI_Status, int);
 bool CheckPath(rowvec);
 int Pbc(int);
