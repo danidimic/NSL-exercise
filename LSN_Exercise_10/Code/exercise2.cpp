@@ -14,7 +14,7 @@ int main(int argc, char *argv[]){
 
 	double L[4], aveL, l;
 	int ibest, size, rank, n=1;
-	ofstream Lenght;
+	ofstream Lenght, Avelenght;
 
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
@@ -22,23 +22,30 @@ int main(int argc, char *argv[]){
 	MPI_Status stat;
 
 	Input(rank);
+	Avelenght.open("results/avelenght.out");
+	Lenght.open("results/lenght_rank" + to_string(rank) + ".out");
 
 	for(int i=0; i<nstep; i++){
 
 		Generation();		//Nuova generazione di percorsi
 
 		if(i%10==0){
+			//lunghezza del miglior percorso di ciascun nodo
+			ibest = fitness.index_max();
+			Lenght<<i<<"  "<<CostFunction(population.row(ibest))<<endl;
+			//lunghezza media della migliore metà popolazione di ciascun nodo
+			aveL = BestHalf();
+
 			MPI_Gather(&aveL, 1, MPI_DOUBLE, L, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-			if(rank==0){
+			if(rank==0){	//Media sui 4 nodi del programma
 				l = 0;
-				//cout<<L[0]<<"   "<<L[1]<<"   "<<L[2]<<"   "<<L[3]<<endl;
 				for(int j=0; j<size; j++) l += L[j];
-				lenght.push_back( l/(double)size );
+				Avelenght<<i<<"  "<<l/(double)size<<endl;
 			}
 		}
 
-		if(i%nmigr==0){	//Scambio dei percorsi migliori
+		if(i%nmigr==0){	//Scambio dei percorsi migliori ogni nmigr generazioni
 			if(rank==0) cout<<endl<<"Migrazione numero = "<<n<<endl;
 			n++;
 
@@ -46,11 +53,19 @@ int main(int argc, char *argv[]){
 		}
 	}
 
+	Lenght.close();
+	Avelenght.close();
+
 	if(rank==0){
-		Lenght.open("results/lenght.out", ios::app);
-		for(int i=0; i<(int)lenght.size(); i++)
-			Lenght<<i<<"  "<<lenght[i]<<endl;
-		Lenght.close();
+		Path.open("results/best_path.out");
+		ibest = fitness.index_max();
+		Path<<population.row(ibest)<<endl;
+		Path.close();
+
+		Cities.open("results/cities.out");
+		for(int i=0; i<ncities; i++)
+			Cities<<cities.row(i)<<endl;
+		Cities.close();
 	}
 
 	MPI_Finalize();
@@ -87,7 +102,7 @@ void Input(int rank){
 		cout<<"Dimensioni dell'elite = "<<elsize<<endl;
 		cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl<<endl;
 
-		cout<<"Migrazioni tra individui migliori ogni "<<nmigr<<" generazioni"<<endl<<endl;
+		cout<<"Migrazioni tra individui migliori ogni "<<nmigr<<" generazioni"<<endl;
 	}
 
 	//Probabilità crossover e mutazioni

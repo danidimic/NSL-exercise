@@ -16,7 +16,6 @@ int power = 1, ncities, ndim, npop, nstep, elsize;
 //Parallel Program
 int swapindex[4], nmigr;
 vector<int> change;
-vector<double> lenght;
 
 //Funzioni
 void Input(int);
