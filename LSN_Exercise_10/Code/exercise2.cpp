@@ -11,15 +11,17 @@ using namespace std;
 
 
 int main(int argc, char *argv[]){
-
-	double L[4], aveL, l;
-	int ibest, size, rank, n=1;
-	ofstream Lenght, Avelenght, Cities, Path;	
-
+	int size, rank;
 	MPI_Init(&argc,&argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 	MPI_Status stat;
+
+	int ibest, n=1;
+	double L[4], aveL, l, tstart, tend, dt;
+	ofstream Lenght, Avelenght, Cities, Path;
+
+	tstart = MPI_Wtime(); //tempo iniziale
 
 	Input(rank);
 	//cout<<"rank = "<<rank<<endl<<cities<<endl<<endl<<endl;
@@ -72,9 +74,12 @@ int main(int argc, char *argv[]){
 		Path.close();
 	}
 
-	MPI_Finalize();
-
 	rnd.SaveSeed();
+
+	tend = MPI_Wtime();
+	dt = tend - tstart;
+	cout<<dt<<endl;
+	MPI_Finalize();
 	return 0;
 
 }
@@ -427,7 +432,7 @@ void RandomExchange(void){
 
 void ExchangeBestPath(MPI_Status stat, int rank){
 
-	int r, ibest;
+	int r, ibest, ichange;
 
 	if(rank == 0) RandomExchange();
 	MPI_Scatter(swapindex, 1, MPI_FLOAT, &r, 1, MPI_FLOAT, 0, MPI_COMM_WORLD);
@@ -459,8 +464,8 @@ void ExchangeBestPath(MPI_Status stat, int rank){
 	for(int i=0; i<ncities; i++)
 		path[i] = change[i];
 
-	ibest = fitness.index_max();
-	population.row(ibest) = path;
+	ichange = Select();
+	population.row(ichange) = path;
 }
 
 //Periodic boundary condition
