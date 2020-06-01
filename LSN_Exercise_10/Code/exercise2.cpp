@@ -75,7 +75,7 @@ int main(int argc, char *argv[]){
 	rnd.SaveSeed();
 	tend = MPI_Wtime(); 	//tempo finale
 	dt = tend - tstart;		//durata del processo
-	if(rank==0)cout<<endl<<"Durata del processo = "<<dt<<endl;
+	cout<<"Rango = "<<rank<<endl<<"Durata del processo = "<<dt<<endl;
 
 	MPI_Finalize();
 	return 0;
