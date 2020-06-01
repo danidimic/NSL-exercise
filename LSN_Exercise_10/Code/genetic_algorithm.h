@@ -14,20 +14,19 @@ double pcross, pmpp, pmsh, pmrev, elite, side;
 int power = 1, ncities, ndim, npop, nstep, elsize;
 
 //Parallel Program
-int swapindex[4], nmigr, gocities = 0;
-vector<int> change, getcities;
+int nmigr;
+vector<int> change;
+
 
 //Funzioni
 void Input(int);
 void FitnessFunc(void);
 void Generation(void);
-void RandomExchange(void);
-void CreateCities(int);
-void BroadcastCities(void);
-void ExchangeBestPath(MPI_Status, int);
-bool CheckPath(rowvec);
+void CreateCities(void);
+void ExchangeBestPath(int, int);
 int Pbc(int);
 int Select(void);
+bool CheckPath(rowvec);
 double CostFunction(rowvec);
 double BestHalf();
 mat Crossover();
