@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
 			if(rank==0) cout<<endl<<"Migrazione numero = "<<n<<" / "<<nstep/nmigr<<endl;
 			n++;
 
-			for(int j=0; j<elsize; j++) ExchangeBestPath(size, rank);
+			for(int j=0; j<5; j++) ExchangeBestPath(size, rank);
 		}
 	}
 	Lenght.close();
@@ -377,7 +377,7 @@ void ExchangeBestPath(int size, int rank){
 	MPI_Bcast(&change.front(), change.size(), MPI_INTEGER, rank, MPI_COMM_WORLD);
 
 	r = rnd.Rannyu(0, size);
-	if(rank == r){
+	if(rank != r){
 		rowvec path(ncities);
 		for(int i=0; i<ncities; i++)
 			path[i] = change[i];
