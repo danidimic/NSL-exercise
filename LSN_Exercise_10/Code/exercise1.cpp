@@ -259,10 +259,10 @@ void UpdateProbabilities(void){
 	PMrev.push_back(pmrev);
 	PMmul.push_back(pmul);
 
-	pmpp *= 0.95;
- 	pmsh *= 0.95;
-	pmrev *= 0.9;
-	pmul *= 0.8;
+	pmpp *= 0.98;
+ 	pmsh *= 0.97;
+	pmrev *= 0.92;
+	pmul *= 0.95;
 }
 
 
