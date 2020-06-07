@@ -1,11 +1,11 @@
 32
 2
 10
-1000000
-0.2
-0.3
-0.3
-0.2
+10000
+0.25
+0.20
+0.30
+0.25
 
 
 ReadInput >> ncities
@@ -14,7 +14,6 @@ ReadInput >> side
 ReadInput >> nstep
 ReadInput >> pmpp				PairPermutation probability
 ReadInput >> pmsh				Shift probability
-ReadInput >> pmrev			Reverse probability
+ReadInput >> pmrev				Reverse probability
 ReadInput >> pmul				MultiPermutation probability
-
 

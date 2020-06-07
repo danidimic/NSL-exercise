@@ -43,17 +43,13 @@ int main(int argc, char *argv[]){
 					bestpath = currentpath;
 				}
 			}
-
-			if(j%100000==0){
-				cout<<"Generazione = "<<ntot<<endl;
-				cout<<"Lunghezza minima = "<<bestL<<endl;
-
-				lenght.push_back(bestL);
-			}
-
 			ntot++;
 		}
-		UpdateProbabilities();
+		//UpdateProbabilities();
+
+		cout<<"Generazione = "<<ntot<<endl;
+		cout<<"Lunghezza minima = "<<bestL<<endl;
+		lenght.push_back(bestL);
 	}
 
 	cout<<endl<<"Generazioni totali = "<<ntot<<endl;
@@ -66,17 +62,12 @@ int main(int argc, char *argv[]){
 
 	Lenght.open("results/lenght.out");
 	for(int i=0; i<(int)lenght.size(); i++)
-		Lenght<<i<<"  "<<lenght[i]<<endl;
+		Lenght<<temp[i]<<"  "<<lenght[i]<<endl;
 	Lenght.close();
 
 	Path.open("results/best_path.out");
 	Path<<bestpath<<endl;
 	Path.close();
-
-	Prob.open("results/probabilities.out");
-	for(int i=0; i<(int)temp.size(); i++)
-		Prob<<temp[i]<<"  "<<PMpp[i]<<"  "<<PMsh[i]<<"  "<<PMrev[i]<<"  "<<PMmul[i]<<endl;
-	Prob.close();
 
 	rnd.SaveSeed();
 	return 0;
@@ -99,8 +90,8 @@ void Input(void){
 	INDECES = linspace<vec>(1, ncities-1, ncities-1);
 
 	ReadInput >> nstep;
-	cout<<"Iterazioni dell'algoritmo genetico = "<<nstep<<endl;
-	temp = linspace<vec>(Tmax, Tmin, 25);
+	cout<<"Iterazioni dell'algoritmo di Metropolis = "<<nstep<<endl;
+	temp = linspace<vec>(Tmax, Tmin, ntemp);
 	cout<<"Temperatura fittizia da "<<Tmax<<" a "<<Tmin<<endl<<endl;
 
 	//Probabilità mutazioni
@@ -259,9 +250,9 @@ void UpdateProbabilities(void){
 	PMrev.push_back(pmrev);
 	PMmul.push_back(pmul);
 
-	pmpp *= 0.98;
- 	pmsh *= 0.97;
-	pmrev *= 0.92;
+	pmpp *= 0.99;
+ 	pmsh *= 0.99;
+	pmrev *= 0.95;
 	pmul *= 0.95;
 }
 

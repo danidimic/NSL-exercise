@@ -15,7 +15,8 @@ int power = 1, ncities, ndim, nstep;
 
 //Simulated Annealing
 vec temp;
-double beta, Tmin = 0.01, Tmax = 5.; 
+int ntemp = 500;
+double beta, Tmin = 0.01, Tmax = 5.;
 
 vector<double> lenght, PMpp, PMsh, PMrev, PMmul;
 
