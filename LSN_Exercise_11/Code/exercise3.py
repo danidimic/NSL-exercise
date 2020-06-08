@@ -11,7 +11,7 @@ from tensorflow.keras.utils import get_custom_objects
 
 a = 1.5
 sigma = 0.20 #standard deviation of noise
-Nepochs = 150 #numero di epoche
+Nepochs = 15 #numero di epoche
 Ntrain = 1000 #numero di valori di test
 Nvalid = 100  #numero di valori di validazione
 
@@ -48,7 +48,7 @@ model = Sequential()
 
 model.add(Dense(units=27, input_dim=2, activation='relu'))
 model.add(Dense(units=18, activation='relu'))
-model.add(Dense(1, activation='softmax'))
+model.add(Dense(10, activation='softmax'))
 
 #compile the model choosing optimizer, loss and metrics objects
 model.compile(optimizer='sgd', loss='mse', metrics=['mse'])
@@ -71,11 +71,36 @@ plt.plot(xtarg, target(xtarg), label='target', lw=2.5) #funzione target
 plt.grid(True)
 plt.legend()
 plt.show()
-
-save_model_path='exercise3/model' + name
-model.save(filepath=save_model_path, include_optimizer=True)
 '''
+n = 10
+x_predicted = np.zeros((n, 2))
+for i in range(n):
+	x_predicted[i,0] = np.random.uniform(-a, a)
+	x_predicted[i,1] = np.random.uniform(-a, a)
+y_predicted = model.predict(x_predicted).reshape(-1)
+
+print(x_predicted)
+print()
+print()
+print(y_predicted)
+print(y_predicted.size())
+
+x = x_predicted[:,0]
+y = x_predicted[:,1]
+z = y_predicted[:]
+
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401 unused import
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+
+ax.scatter(x, y, z, c='tab:blue')
+ax.set_xlabel('X Label')
+ax.set_ylabel('Y Label')
+ax.set_zlabel('Z Label')
+plt.show()
 
 
+#save_model_path='exercise3/model' + name
+#model.save(filepath=save_model_path, include_optimizer=True)
 
 
