@@ -43,7 +43,13 @@ int main(int argc, char *argv[]){
 			if(rank==0) cout<<endl<<"Migrazione numero = "<<n<<" / "<<nstep/nmigr<<endl;
 			n++;
 
-			for(int j=0; j<elsize; j++) ExchangeBestPath(size, rank);
+			for(int j=0; j<size; j++){
+				//condivido il percorso migliore
+				ShareBestPath(size, j);
+				//inserisco nella popolazione il percorso migliore
+				if(rank == change.back()) GetPath();
+				change.resize(0);
+			}
 		}
 	}
 	Lenght.close();
@@ -56,7 +62,7 @@ int main(int argc, char *argv[]){
 	if(rank==0){
 		ibest = 0;
 		l = L[0];
-		for(int i=0; i<4; i++) 
+		for(int i=0; i<size; i++) 
 			if(L[i]<l){
 				l = L[i];
 				ibest = i;
@@ -360,27 +366,33 @@ double BestHalf(){
 }
 
 //Scambio dei percorsi migliori
-void ExchangeBestPath(int size, int rank){
+void ShareBestPath(int size, int root){
 
 	int index, r;
 	index = fitness.index_max();
 	rowvec path = population.row(index);
-
+	//metto il percorso in uno std vector
 	for(int i=0; i<ncities; i++)
 		change.push_back( path[i] );
-	//Passo il vettore change a tutti i processi 
-	MPI_Bcast(&change.front(), change.size(), MPI_INTEGER, rank, MPI_COMM_WORLD);
-
-	r = rnd.Rannyu(0, size);
-	if(rank == r){
-		rowvec path(ncities);
-		for(int i=0; i<ncities; i++)
-			path[i] = change[i];
-
-		index = Select();
-		population.row(index) = path;
+	//seleziono il processo ricevente
+	for(;;){
+		r = rnd.Rannyu(0, size);
+		if(r!=root) break;
 	}
-	change.resize(0);
+	change.push_back(r);
+
+	//Passo il vettore change a tutti i processi 
+	MPI_Bcast(&change.front(), change.size(), MPI_INTEGER, root, MPI_COMM_WORLD);
+}
+
+//Inserisco change nella popolazione
+void GetPath(){
+	rowvec path(ncities);
+	for(int i=0; i<ncities; i++)
+		path[i] = change[i];
+
+	int index = Select();
+	population.row(index) = path;
 }
 
 //Periodic boundary condition
