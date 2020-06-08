@@ -1,0 +1,55 @@
+--- NN1 ---
+model.add(Dense(units=1, input_dim=1, activation='relu'))
+model.add(Dense(units=1, activation='relu'))
+model.add(Dense(units=1))
+
+--- NN2 ---
+model.add(Dense(units=1, input_dim=1, activation='relu'))
+model.add(Dense(units=4, activation='relu'))
+model.add(Dense(units=1))
+
+--- NN3 --- 
+model.add(Dense(units=10, input_dim=1, activation='relu'))
+model.add(Dense(units=4, activation='relu'))
+model.add(Dense(units=1))
+
+--- NN4 ---
+model.add(Dense(units=20, input_dim=1, activation='relu'))
+model.add(Dense(units=4, activation='relu'))
+model.add(Dense(units=1))
+
+--- NN5 ---
+model.add(Dense(units=40, input_dim=1, activation='relu'))
+model.add(Dense(units=10, activation='relu'))
+model.add(Dense(units=1))
+
+--- NN6 ---
+model.add(Dense(units=100, input_dim=1, activation='relu'))
+model.add(Dense(units=25, activation='relu'))
+model.add(Dense(units=1))
+
+--- relu ---
+model.add(Dense(units=200, input_dim=1, activation='relu'))
+model.add(Dense(units=45, activation='relu'))
+model.add(Dense(units=1))
+
+--- elu ---
+model.add(Dense(units=200, input_dim=1, activation='elu'))
+model.add(Dense(units=45, activation='elu'))
+model.add(Dense(units=1))
+
+--- sigmoid ---
+model.add(Dense(units=200, input_dim=1, activation='sigmoid'))
+model.add(Dense(units=45, activation='sigmoid'))
+model.add(Dense(units=1))
+
+--- tanh ---
+model.add(Dense(units=200, input_dim=1, activation='tanh'))
+model.add(Dense(units=45, activation='tanh'))
+model.add(Dense(units=1))
+
+--- optimizer changed ---
+model.add(Dense(units=200, input_dim=1, activation='relu'))
+model.add(Dense(units=45, activation='relu'))
+model.add(Dense(units=1))
+
