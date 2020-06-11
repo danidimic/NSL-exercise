@@ -34,7 +34,7 @@ y_target = target(xtarg)
 #compose the NN model
 model = Sequential()
 
-model.add(Dense(units=200, input_dim=1, activation='relu'))
+model.add(Dense(units=200, input_shape=(1,), activation='relu'))
 model.add(Dense(units=45, activation='relu'))
 model.add(Dense(units=1))
 

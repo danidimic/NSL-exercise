@@ -46,7 +46,7 @@ for i in range(Nvalid):
 
 #compose the NN model
 model = Sequential()
-model.add(Dense(units=200, input_dim=2, activation='relu'))
+model.add(Dense(units=200, input_shape=(2,), activation='relu'))
 model.add(Dense(units=45, activation='relu'))
 model.add(Dense(1))
 
