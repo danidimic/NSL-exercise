@@ -16,7 +16,6 @@ Nepochs = 150 #numero di epoche
 Ntrain = 1000 #numero di valori di test
 Nvalid = 100  #numero di valori di validazione
 
-name = ''
 
 def target(X):
 	x = X[0]
@@ -51,7 +50,7 @@ model.add(Dense(units=45, activation='relu'))
 model.add(Dense(1))
 
 #compile the model choosing optimizer, loss and metrics objects
-model.compile(optimizer='sgd', loss='mse', metrics=['mse'])
+model.compile(optimizer='RMSprop', loss='mse', metrics=['mse'])
 #get a summary of our composed model
 model.summary()
 
@@ -81,6 +80,16 @@ ax.set_xlabel('X Label')
 ax.set_ylabel('Y Label')
 ax.set_zlabel('Z Label')
 plt.show()
+
+# summarize history for loss
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.ylabel('model loss')
+plt.xlabel('epoch')
+plt.grid(True)
+plt.legend(['train', 'test'], loc='best')
+plt.show()
+
 
 save_model_path='exercise3/model2D'
 model.save(filepath=save_model_path, include_optimizer=True)

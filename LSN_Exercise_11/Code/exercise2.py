@@ -34,12 +34,12 @@ y_target = target(xtarg)
 #compose the NN model
 model = Sequential()
 
-model.add(Dense(units=200, input_shape=(1,), activation='relu'))
-model.add(Dense(units=45, activation='relu'))
+model.add(Dense(units=100, input_shape=(1,), activation='relu'))
+model.add(Dense(units=25, activation='relu'))
 model.add(Dense(units=1))
 
 #compile the model choosing optimizer, loss and metrics objects
-model.compile(optimizer='sgd', loss='mse', metrics=['mse'])
+model.compile(optimizer='RMSprop', loss='mse', metrics=['mse'])
 #get a summary of our composed model
 model.summary()
 
