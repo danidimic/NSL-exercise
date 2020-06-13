@@ -53,24 +53,31 @@ print('Y_train shape:', Y_train.shape)
 
 def create_CNN():
     # instantiate model
-    model = Sequential()
+	model = Sequential()
     # add first convolutional layer with 10 filters (dimensionality of output space)
-    model.add(Conv2D(10, kernel_size=(5, 5),
+	model.add(Conv2D(10, kernel_size=(5, 5),
                      activation='relu',
                      input_shape=input_shape))
-    
-    model.add(Dropout(0.2))
-    model.add(Conv2D(15, kernel_size=3, activation='relu'))
-    model.add(Dropout(0.2))
 
-    model.add(Flatten())
-    model.add(Dense(10, activation='softmax'))
+	model.add(MaxPooling2D())
+
+	model.add(Conv2D(16, kernel_size=(5, 5), activation='relu'))
+	
+	model.add(MaxPooling2D())
+
+	model.add(Flatten())
+
+	model.add(Dense(256, activation='relu'))
+	
+	model.add(Dropout(0.2))
+    
+	model.add(Dense(10, activation='softmax'))
 
     # compile the model
-    model.compile(loss=keras.losses.categorical_crossentropy,
+	model.compile(loss=keras.losses.categorical_crossentropy,
                   optimizer='SGD',
                   metrics=['accuracy'])
-    return model
+	return model
 
 # training parameters
 batch_size = 32
@@ -78,8 +85,9 @@ epochs = 10
 
 # create the deep conv net
 model_CNN=create_CNN()
+model_CNN.summary()
 
-csv_logger = CSVLogger('exercise2/test.log', separator=',', append=False)
+csv_logger = CSVLogger('exercise2/test3.log', separator=',', append=False)
 # train CNN
 history = model_CNN.fit(X_train, Y_train,
           batch_size=batch_size,
@@ -112,6 +120,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.show()
 
-save_model_path='exercise2/model'
+save_model_path='exercise2/model3'
 model_CNN.save(filepath=save_model_path, include_optimizer=True)
 
