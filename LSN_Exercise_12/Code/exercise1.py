@@ -7,12 +7,14 @@ from tensorflow import keras
 from tensorflow.keras.datasets import mnist
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout
-from tensorflow.keras.optimizers import SGD, Adam, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam
-
+from tensorflow.keras.optimizers import SGD, Adam, RMSprop, Adagrad, Adadelta, Adamax, Nadam
+from tensorflow.keras.callbacks import CSVLogger
 
 seed=0
-np.random.seed(seed) # fix random seed
-tf.random.set_seed(seed)
+np.random.seed(seed) #fix random seed
+tf.random.set_seed(seed) #fix random seed
+
+name = 'Adamax'
 
 # input image dimensions
 img_rows, img_cols = 28, 28 # number of pixels 
@@ -75,7 +77,7 @@ def compile_model():
     model=create_DNN()
     # compile the model
     model.compile(loss=keras.losses.categorical_crossentropy,
-                  optimizer=Adam(),
+                  optimizer=name,
                   metrics=['accuracy'])
     return model
 
@@ -88,12 +90,14 @@ epochs = 15
 # create the deep neural net
 model_DNN = compile_model()
 
+
+csv_logger = CSVLogger('exercise1/' + name + '.log', separator=',', append=False)
 # train DNN and store training info in history
 history = model_DNN.fit(X_train, Y_train,
           batch_size=batch_size,
           epochs=epochs,
           verbose=1,
-          validation_data=(X_test, Y_test))
+          validation_data=(X_test, Y_test), callbacks=[csv_logger])
 
 # evaluate model
 score = model_DNN.evaluate(X_test, Y_test, verbose=1)
@@ -105,7 +109,6 @@ print('Test accuracy:', score[1])
 
 # look into training history
 # summarize history for accuracy
-
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
 plt.ylabel('model accuracy')
@@ -134,7 +137,6 @@ for i in range(10):
     plt.axis('off') 
 plt.show()
 
-name = 'Adam'
 save_model_path='exercise1/model' + name
 model_DNN.save(filepath=save_model_path, include_optimizer=True)
 
