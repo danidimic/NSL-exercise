@@ -9,6 +9,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Activation
 from tensorflow.keras import backend as K
 from tensorflow.keras.utils import get_custom_objects
+from tensorflow.keras.callbacks import CSVLogger
 
 a = 1.5
 sigma = 0.20 #standard deviation of noise
@@ -54,11 +55,12 @@ model.compile(optimizer='RMSprop', loss='mse', metrics=['mse'])
 #get a summary of our composed model
 model.summary()
 
+csv_logger = CSVLogger('exercise3/test.log', separator=',', append=False)
 # fit the model using training dataset
 history = model.fit(x=x_train, y=y_train, 
           batch_size=32, epochs=Nepochs,
           shuffle=True, # a good idea is to shuffle input before at each epoch
-          validation_data=(x_valid, y_valid))
+          validation_data=(x_valid, y_valid), callbacks=[csv_logger])
 
 
 n = 10000
